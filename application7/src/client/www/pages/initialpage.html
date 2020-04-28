@@ -1,0 +1,39 @@
+<template>
+<div class="page" data-name="home">
+  <div class="appbar">
+    <div class="appbar-inner">
+      My profile
+    </div>
+  </div>
+
+  <!-- Scrollable page content-->
+  <div class="page-content">
+
+    <div class="subnavbar">
+        <div class="subnavbar-inner">
+            <div class="segmented">
+              <a href="#tab1" class="button button-active">Deconnexion</a>
+              <a href="#tab2" class="button" @click='montoken'>My token</a>
+              <a href="#tab3" class="button" @click='nextpage'>Next Page</a>
+            </div>
+        </div>
+    </div>
+</div>
+</template>
+<script>
+return {
+  methods : {
+    montoken : function(){
+      alert(this.$route.params.obj)
+    },
+    nextpage : function(){
+      this.$router.navigate(
+        {
+          name:'profil',
+          params:{mytoken:this.$route.params.obj , myidd:this.$route.params.monid , nomm:this.$route.params.monnom , prenomm:this.$route.params.monprenom},
+        }
+      );
+    }
+  }
+}
+</script>

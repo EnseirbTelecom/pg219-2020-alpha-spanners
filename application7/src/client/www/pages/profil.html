@@ -1,0 +1,121 @@
+<template>
+<div class="page" data-name="home">
+  <div class="appbar">
+    <div class="appbar-inner">
+      Liste des amis
+    </div>
+  </div>
+
+  <!-- Scrollable page content-->
+   <div class="page-content">
+
+      <div class="subnavbar">
+          <div class="subnavbar-inner">
+              <div class="segmented">
+                <a href="#tab1" class="button button-active" @click = 'previouspage'>Previous page</a>
+                <a href="#tab2" class="button" @click='monprofil'>Mon profil</a>
+                <a href="#tab3" class="button">Next Page</a>
+              </div>
+          </div>
+      </div>
+
+    <div class="block-title">Liste des amis</div>
+      <div class="list links-list">
+        <ul>
+          {{#each friends}}
+          {{#js_if "this.expediteur ===  ../../$route.params.idd"}}
+            <a href="#"><li>{{destinataireNom}} {{destinatairePrenom}} </li></a>
+          {{else}}
+            {{#js_if "this.destinaireid === ../../$route.params.idd"}}
+            <a href="#"><li>{{expediteurNom}} {{expediteurPrenom}} </li></a>
+            {{/js_if}}
+          {{/js_if}}
+          <div class="block block-strong row">
+            <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{expediteur}}','{{destinaireid}}','{{statut}}')">
+              {{#js_if "this.statut === 'en attente'"}}
+                    Annuler la demande d'invitation
+              {{else}}
+                  {{#js_if "this.statut === 'accepted'"}}
+                    Supprimer ce contact
+                  {{/js_if}}
+              {{/js_if}}</a></div>
+          </div>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+
+   </div>
+</div>
+</template>
+<script>
+return {
+  async data() {
+    let friends = [];
+    try {
+      friends = await fetch("http://localhost:3000/friend")
+        .then(res => res.json())
+    }catch(err) {
+      this.$app.dialog.alert("Error " + err);
+    }
+    finally{
+      let i = friends.length - 1
+      while(i>=0){
+        if(friends[i].expediteur === this.$route.params.idd && friends[i].statut === 'refused'){
+          enleve_friend1=friends.splice(i,1);
+        }
+        else if (friends[i].destinaireid === this.$route.params.idd && friends[i].statut === 'refused'){
+          enleve_friend2=friends.splice(i,1);
+        }
+        else if(friends[i].destinaireid === this.$route.params.idd && friends[i].statut === 'en attente'){
+          enleve_friend3=friends.splice(i,1);
+        }
+        else if(friends[i].expediteur !== this.$route.params.idd && friends[i].destinaireid !== this.$route.params.idd){
+          enleve_friend4=friends.splice(i,1);
+        }
+        i=i-1;
+      }
+    }
+    //alert(JSON.stringify(friends))
+    return { friends: friends };
+  },
+  methods: {
+    delete : function(idexp,iddest,statut){
+      fetch("http://localhost:3000/ami/" + idexp + '/' + iddest , {
+          method: "DELETE",
+      })
+      .catch(err => this.$app.dialog.alert('Error ' + err))
+      .finally(() => {
+          if(statut === 'en attente'){
+            this.$app.dialog.alert("Vous avez retiré votre demande d'ajouts")
+          }
+          else if(statut === 'accepted'){
+            this.$app.dialog.alert("Ce contact a été supprimé de votre liste d'amis")
+          }
+          this.$router.navigate(
+            {
+              name:'mapage',
+              params:{obj:this.$route.params.tokenn,monid:this.$route.params.idd,monnom:this.$route.params.noom,monprenom:this.$route.params.prenoom},
+            }
+          );
+      });
+    },
+    previouspage : function(){
+      this.$router.navigate(
+        {
+            name:'profil',
+            params:{mytoken:this.$route.params.tokenn,myidd:this.$route.params.idd,nomm:this.$route.params.noom,prenomm:this.$route.params.prenoom},
+        }
+      );
+    },
+    monprofil : function(){
+      this.$router.navigate(
+        {
+          name:'mapage',
+          params:{obj:this.$route.params.tokenn,monid:this.$route.params.idd,monnom:this.$route.params.noom,monprenom:this.$route.params.prenoom},
+        }
+      );
+    }
+  }
+}
+</script>

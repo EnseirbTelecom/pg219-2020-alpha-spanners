@@ -1,0 +1,120 @@
+<template>
+<div class="page" data-name="home">
+  <div class="appbar">
+    <div class="appbar-inner">
+      Liste des inscrits
+    </div>
+  </div>
+
+  <!-- Scrollable page content-->
+  <div class="page-content">
+
+    <div class="subnavbar">
+        <div class="subnavbar-inner">
+            <div class="segmented">
+              <a href="#tab1" class="button button-active">Previous page</a>
+              <a href="#tab2" class="button" @click='notification'>Notifications</a>
+              <a href="#tab3" class="button" @click ='nextppage'>Next Page</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="block-title">Liste des inscrits</div>
+      <div class="list links-list">
+        <ul>
+          {{#each inscrits}}
+          <a href="#"><li>{{mail}} {{prenom}} {{nom}}</li></a>
+          <div class="block block-strong row">
+            <div class="col"><a class="button convert-form-to-data" href ='#' @click="add('{{nom}}','{{prenom}}','{{_id}}')" >Add {{prenom}}</a></div>
+          </div>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+return {
+    async data() {
+      let inscrits = [];
+      try {
+        inscrits = await fetch("http://localhost:3000/contacts")
+            .then(res => res.json())
+      }
+      catch(err) {
+        this.$app.dialog.alert("Error " + err);
+      }
+
+      let amis = [];
+      try {
+        amis = await fetch("http://localhost:3000/friend")
+          .then(response => response.json())
+      }
+      catch(err){
+        this.$app.dialog.alert("Error " + err);
+      }
+      finally{
+        if(amis.length !=0){
+          for (var i=0 ; i <amis.length ; i++){
+            for(var j =0;j<inscrits.length;j++){
+              if(amis[i].destinaireid === inscrits[j]._id && amis[i].expediteur === this.$route.params.myidd){
+                enleve_inscrit=inscrits.splice(j,1)
+              }
+              else if(amis[i].expediteur === inscrits[j]._id && amis[i].destinaireid === this.$route.params.myidd){
+                enleve_inscrit1=inscrits.splice(j,1)
+              }
+            }
+          }
+        }
+        for(var j=0;j<inscrits.length;j++){
+          if(inscrits[j]._id === this.$route.params.myidd){
+            enleve_inscrit1 = inscrits.splice(j,1)
+          }
+        }
+      }
+      return { inscrits: inscrits };
+    },
+    methods : {
+      add: function(nom,prenom,id) {
+          fetch('http://localhost:3000/friend', {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                friendNom: nom,
+                friendPrenom:prenom,
+                monId: this.$route.params.myidd,
+                idFriend : id,
+                monNom:this.$route.params.nomm,
+                monPrenom:this.$route.params.prenomm
+              })
+          })
+          .catch(err => this.$app.dialog.alert('Error ' + err))
+          .finally(() => {
+            this.$app.dialog.alert('Votre invitation a bien été envoyé à ' + nom + ' ' + prenom)
+            this.$router.navigate(
+                {
+                  name:'friends',
+                  params: {tokenn : this.$route.params.mytoken, idd: this.$route.params.myidd, noom: this.$route.params.nomm ,prenoom:this.$route.params.prenomm},
+                }
+            );
+          })
+      },
+      nextppage: function(){
+        this.$router.navigate(
+          {
+            name:'friends',
+            params:{tokenn: this.$route.params.mytoken,idd: this.$route.params.myidd,noom: this.$route.params.nomm ,prenoom:this.$route.params.prenomm},
+          }
+        );
+      },
+      notification: function(){
+        this.$router.navigate(
+          {
+            name:'mesnotifs',
+            params: {tokeen: this.$route.params.mytoken , myid : this.$route.params.myidd, monnomm:this.$route.params.nomm , monprenomm: this.$route.params.prenomm},
+          }
+        );
+      }
+    }
+}
+</script>
