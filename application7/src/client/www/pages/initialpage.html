@@ -1,101 +1,39 @@
 <template>
-  <div id="app">
-    <!-- Left panel with cover effect-->
-    <div id = "my-panel" class="panel panel-left panel-cover theme-color panel-init">
-      <div class="view">
-        <div class="page">
-          <div class="navbar">
-            <div class="navbar-bg"></div>
-            <div class="navbar-inner">
-              <div class="title">Menu</div>
-            </div>
-          </div>
-          <div class="page-content">
-            <div class="list">
-              <ul>
-                <li>
-                  <a href="#tab1" class="tab-link">
-                    <i class="icon f7-icons if-not-md">square_list_fill</i>
-                    <i class="icon material-icons if-md">person_pin_circle</i>
-                    <div class="item-inner">
-                    <span class="tabbar-label">Historique des positions</span>
-                    </div>
-                  </a>
-              </li>
-              <li>
-                <a href="#tab2" class="button" @click='myfriends'>
-                  <i class="icon f7-icons if-not-md">gear_alt</i>
-                  <i class="icon material-icons if-md">people</i>
-                  Friends
-                  <div class="item-inner">
-                   <span class="tabbar-label">Friends</span>
-                  </div>
-                </a>
-              </li>
-              <li>
-                <a href="#tab3" class="button" @click='monprofil'>
-                  <i class="icon f7-icons if-not-md">house_fill</i>
-                  <i class="icon material-icons if-md">home</i>
-                  Home
-                  <div class="item-inner">
-                    <span class="tabbar-label">Home</span>
-                   </div>
-                </a>
-              </li>
-              <li>
-                <a href="#tab4" class="button" @click='notification'>notifications</a>
-              </li>
-             </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
 <div class="page" data-name="home">
-  <div class="navbar navbar-large">
-    <div class="navbar-bg"></div>
-    <div class="navbar-inner">
-      <div class="left">
-        <a href="#" class="link icon-only panel-open" data-panel="left">
-          <i class="icon f7-icons if-not-md">menu</i>
-          <i class="icon material-icons if-md">menu</i>
-        </a>
-      </div>
-      <div class="title-large">
-        <div class="title-large-text">mylocation app</div>
-      </div>
+  <div class="appbar">
+    <div class="appbar-inner">
+      My profile
+    </div>
+  </div>
+
+  <!-- Scrollable page content-->
+  <div class="page-content">
+
+    <div class="subnavbar">
+        <div class="subnavbar-inner">
+            <div class="segmented">
+              <a href="#tab1" class="button button-active">Deconnexion</a>
+              <a href="#tab2" class="button" @click='montoken'>My token</a>
+              <a href="#tab3" class="button" @click='nextpage'>Next Page</a>
+            </div>
+        </div>
     </div>
 </div>
-
 </template>
 <script>
 return {
   methods : {
-    monprofil : function(){
+    montoken : function(){
+      alert(this.$route.params.obj)
+    },
+    nextpage : function(){
       this.$router.navigate(
         {
-          name:'mapage',
-          params:{obj:this.$route.params.obj,monid:this.$route.params.monid,monnom:this.$route.params.monnom,monprenom:this.$route.params.monprenom},
+          name:'profil',
+          params:{mytoken:this.$route.params.obj , myidd:this.$route.params.monid , nomm:this.$route.params.monnom , prenomm:this.$route.params.monprenom},
         }
       );
-    },
-    myfriends : function(){
-      this.$router.navigate(
-        {
-          name:'friends',
-          params:{tokenn:this.$route.params.obj , idd:this.$route.params.monid , noom:this.$route.params.monnom , prenoom:this.$route.params.monprenom},
-        }
-      );
-    },
-    notification: function(){
-        this.$router.navigate(
-          {
-            name:'mesnotifs',
-            params: {tokeen: this.$route.params.obj , myid : this.$route.params.monid, monnomm:this.$route.params.monnom , monprenomm: this.$route.params.monprenom},
-          }
-        );
-      }
+    }
   }
 }
 </script>

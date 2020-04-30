@@ -1,101 +1,18 @@
 <template>
   <div class="page" data-name="home">
-    <div class="limiter">
-      <div class="container-login100">
-        <div class="wrap-login100">
-          <form class="login100-form validate-form">
-            <span class="login100-form-title p-b-26">
-              Welcome
-            </span>
-            <span class="login100-form-title p-b-48">
-              <i class="zmdi zmdi-font"></i>
-            </span>
-  
-            <div class="wrap-input100 validate-input" data-validate = "Valid email is: a@b.c">
-              <input class="input100" type="text" id='mail1' name="email">
-              <span class="focus-input100" id='mail1' data-placeholder="Email"></span>
-            </div>
-  
-            <div class="wrap-input100 validate-input" data-validate="Enter password">
-              <span class="btn-show-pass">
-                <i class="zmdi zmdi-eye"></i>
-              </span>
-              <input class="input100" type="password" id='password1' name="pass">
-              <span class="focus-input100" id='password1' data-placeholder="Password"></span>
-            </div>
-  
-            <div class="container-login100-form-btn">
-              <div class="wrap-login100-form-btn">
-                <div class="login100-form-bgbtn"></div>
-                <a class="button convert-form-to-data"  href="#" @click = "login">
-                  Login
-                </a>
-              </div>
-            </div>
-  
-            <div class="text-center p-t-115">
-              <span class="txt1">
-                Don’t have an account?
-              </span>
-  
-              <a class="button convert-form-to-data" href="/formulaire">
-                Sign Up
-              </a>
-            </div>
-          </form>
-        </div>
+    <div class="appbar">
+      <div class="appbar-inner">
+        Formulaire d'inscription
       </div>
     </div>
-    
-  
+
+    <div class="page-content">
+      <div class="block block-strong row">
+        <div class="col"><a class="button convert-form-to-data" href="/formulaire">Inscription</a></div>
+        <div class="col"><a class="button convert-form-to-data" href="/info">Connexion</a></div>
+      </div>
+    </div>
 
 </template>
 <script>
-return {
-    methods:{
-      login: async function() {
-        let Email = document.getElementById('mail1').value
-        let password2 = document.getElementById('password1').value
-        try{
-          let reponse = await fetch("http://localhost:3000/connexion", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              mailUser : Email,
-              passwordUser : password2,
-            })
-          })
-          .then(res =>res.json())
-          // .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate('/profile/'+res.token))
-          .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate(
-            {
-              name: 'mapage',
-              params: {obj:res.token , monid : res.id , monnom : res.lastname ,monprenom: res.firstname},
-            }))
-
-          //  this.$router.navigate(
-          // {
-          //   name: 'profil',
-          //   params: {obj:res.token , monid : res.id , monnom : res.lastname ,monprenom: res.firstname},
-          // }))
-          // .then(function(res){
-          //   if(res.error){
-          //     this.$app.dialog(res.error)
-          //   }
-          // })
-          //     this.$app.dialog.alert(res.error));
-          //   }
-          // )
-          //
-          // if(reponse.status === 400){
-          //   this.$app.dialog.alert('Vous devez saisir tous les champs');
-          // }
-        }
-        catch(err){
-          this.$app.dialog.alert('Error' + err);
-        }
-      }
-    }
-}
-
 </script>

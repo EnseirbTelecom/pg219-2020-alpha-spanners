@@ -1,18 +1,24 @@
 <template>
 <div class="page" data-name="home">
   <div class="appbar">
-    <div class="left">
-      <a href="#" class="button" @click ='nextppage'>
-        <i class="icon icon-back"></i>
-        Friends
-        <span class="if-not-md">Back</span>
-      </a>
+    <div class="appbar-inner">
+      Liste des inscrits
     </div>
   </div>
 
   <!-- Scrollable page content-->
   <div class="page-content">
-   
+
+    <div class="subnavbar">
+        <div class="subnavbar-inner">
+            <div class="segmented">
+              <a href="#tab1" class="button button-active">Previous page</a>
+              <a href="#tab2" class="button" @click='notification'>Notifications</a>
+              <a href="#tab3" class="button" @click ='nextppage'>Next Page</a>
+            </div>
+        </div>
+    </div>
+
     <div class="block-title">Liste des inscrits</div>
       <div class="list links-list">
         <ul>
@@ -67,10 +73,6 @@ return {
         }
       }
       return { inscrits: inscrits };
-     
-    //alert(JSON.stringify(friends))
-    return { friends: friends };
-
     },
     methods : {
       add: function(nom,prenom,id) {
@@ -90,11 +92,11 @@ return {
           .finally(() => {
             this.$app.dialog.alert('Votre invitation a bien été envoyé à ' + nom + ' ' + prenom)
             this.$router.navigate(
-            {
-              name:'profil',
-              params:{mytoken:this.$route.params.obj , myidd:this.$route.params.monid , nomm:this.$route.params.monnom , prenomm:this.$route.params.monprenom},
-            }
-      );
+                {
+                  name:'friends',
+                  params: {tokenn : this.$route.params.mytoken, idd: this.$route.params.myidd, noom: this.$route.params.nomm ,prenoom:this.$route.params.prenomm},
+                }
+            );
           })
       },
       nextppage: function(){
@@ -105,6 +107,14 @@ return {
           }
         );
       },
+      notification: function(){
+        this.$router.navigate(
+          {
+            name:'mesnotifs',
+            params: {tokeen: this.$route.params.mytoken , myid : this.$route.params.myidd, monnomm:this.$route.params.nomm , monprenomm: this.$route.params.prenomm},
+          }
+        );
+      }
     }
 }
 </script>
