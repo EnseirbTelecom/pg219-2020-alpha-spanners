@@ -1,22 +1,17 @@
 <template>
 <div class="page" data-name="home">
   <div class="appbar">
-    <div class="appbar-inner">
-      Demande d'ajouts d'amis
+    <div class="left">
+      <a href="#" class="button" @click ='previouspage'>
+        <i class="icon icon-back"></i>
+        Home
+        <span class="if-not-md">Back</span>
+      </a>
     </div>
   </div>
 
   <!-- Scrollable page content-->
   <div class="page-content">
-    <div class="subnavbar">
-        <div class="subnavbar-inner">
-            <div class="segmented">
-              <a href="#tab1" class="button button-active" @click ='previouspage'>Previous page</a>
-              <!-- <a href="#tab2" class="button">Home</a> -->
-              <!-- <a href="#tab3" class="button">Next Page</a> -->
-            </div>
-        </div>
-    </div>
     <div class="block-title">Demande d'ajout d'amis</div>
       <div class="list links-list">
         <ul>
@@ -131,8 +126,8 @@ return{
     previouspage:function(){
       this.$router.navigate(
         {
-          name: 'friends',
-          params:{tokenn:this.$route.params.tokeen,idd:this.$route.params.myid,noom:this.$route.params.monnomm,prenoom:this.$route.params.monprenomm},
+          name: 'mapage',
+          params:{obj:this.$route.params.tokeen,monid:this.$route.params.myid,monnom:this.$route.params.monnomm,monprenom:this.$route.params.monprenomm},
         }
       );
     }
