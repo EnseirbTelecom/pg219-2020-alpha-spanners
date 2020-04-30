@@ -2,22 +2,17 @@
 <div class="page" data-name="home">
   <div class="appbar">
     <div class="appbar-inner">
-      Liste des amis
+      <div class="left">
+        <a href="#" class="link icon-only panel-open" data-panel="left">
+          <i class="icon f7-icons if-not-md">menu</i>
+          <i class="icon material-icons if-md">menu</i>
+        </a>
+      </div>
     </div>
   </div>
 
   <!-- Scrollable page content-->
    <div class="page-content">
-
-      <div class="subnavbar">
-          <div class="subnavbar-inner">
-              <div class="segmented">
-                <a href="#tab1" class="button button-active" @click = 'previouspage'>Previous page</a>
-                <a href="#tab2" class="button" @click='monprofil'>Mon profil</a>
-                <a href="#tab3" class="button">Next Page</a>
-              </div>
-          </div>
-      </div>
 
     <div class="block-title">Liste des amis</div>
       <div class="list links-list">
@@ -43,6 +38,9 @@
           {{/each}}
         </ul>
       </div>
+   <div class="block">
+      <a href="#tab1" class="col button button-small button-round button-fill" @click = 'previouspage'>Add a friend</a>
+   </div> 
     </div>
 
    </div>
