@@ -2,20 +2,20 @@
   <div class="page" data-name="home">
     <div class="appbar">
       <div class="appbar-inner">
-        Formulaire d'inscription
+        Register form
       </div>
     </div>
 
     <div class="page-content">
-      <div class="block-title">Formulaire</div>
+      <div class="block-title">Form</div>
         <form class="list" id="my-form">
           <ul>
             <li>
               <div class="item-content item-input">
                 <div class="item-inner">
-                  <div class="item-title item-label">Nom</div>
+                  <div class="item-title item-label">Email</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="mail1" id='mail1' placeholder="Votre mail">
+                    <input type="text" name="mail" id='mail' placeholder="Email">
                   </div>
                 </div>
               </div>
@@ -23,9 +23,9 @@
             <li>
               <div class="item-content item-input">
                 <div class="item-inner">
-                  <div class="item-title item-label">Mot de passe</div>
+                  <div class="item-title item-label">Password</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="password1" id='password1' placeholder="Votre mot de passe">
+                    <input type="password" name="password" id='password' placeholder="Password">
                    </div>
                  </div>
                </div>
@@ -40,15 +40,15 @@
 return {
     methods:{
       login: async function() {
-        let Email = document.getElementById('mail1').value
-        let password2 = document.getElementById('password1').value
+        let mail = document.getElementById('mail').value
+        let password = document.getElementById('password').value
         try{
-          let reponse = await fetch("http://localhost:3000/connexion", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              mailUser : Email,
-              passwordUser : password2,
+          let reponse = await fetch("http://localhost:3000/login", {
+            method  : "POST",
+            headers : { "Content-Type": "application/json" },
+            body    : JSON.stringify({
+              mail     : mail,
+              password : password,
             })
           })
           .then(res =>res.json())
@@ -56,7 +56,7 @@ return {
           .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate(
             {
               name: 'mapage',
-              params: {obj:res.token , monid : res.id , monnom : res.lastname ,monprenom: res.firstname},
+              params: {obj:res.token , monid : res.id , monnom : res.surname ,monprenom: res.name},
             }))
 
           //  this.$router.navigate(

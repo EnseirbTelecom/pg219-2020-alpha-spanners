@@ -11,17 +11,16 @@ var app = new Framework7({
   data: function () {
     return {
       user: {
-        firstName: 'John',
-        lastName: 'Doe',
+        serverAddress: 'http://localhost:3000',
       },
 
     };
   },
   // App root methods
   methods: {
-    helloWorld: function () {
+/*     helloWorld: function () {
       app.dialog.alert('Hello World!');
-    },
+    }, */
   },
   // App routes
   routes: routes,

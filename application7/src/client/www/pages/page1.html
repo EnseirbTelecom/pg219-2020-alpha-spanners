@@ -54,15 +54,15 @@
 return {
     methods:{
       login: async function() {
-        let Email = document.getElementById('mail1').value
-        let password2 = document.getElementById('password1').value
+        let mail = document.getElementById('mail1').value
+        let password = document.getElementById('password1').value
         try{
-          let reponse = await fetch("http://localhost:3000/connexion", {
+          let reponse = await fetch("http://localhost:3000/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              mailUser : Email,
-              passwordUser : password2,
+              mail : mail,
+              password : password,
             })
           })
           .then(res =>res.json())
@@ -70,7 +70,7 @@ return {
           .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate(
             {
               name: 'mapage',
-              params: {obj:res.token , monid : res.id , monnom : res.lastname ,monprenom: res.firstname},
+              params: {obj:res.token , monid : res.id , monnom : res.surname ,monprenom: res.name},
             }))
 
           //  this.$router.navigate(

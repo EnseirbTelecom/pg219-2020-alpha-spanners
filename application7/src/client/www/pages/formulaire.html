@@ -94,16 +94,16 @@ return {
           let bdy = document.getElementById('birthday').value
 
           try{
-            let reponse = await fetch("http://localhost:3000/inscription", {
+            let reponse = await fetch("http://localhost:3000/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                mail : email,
-                password : passWord,
-                nom : lastName,
-                prenom : firstName,
-                pseudo : pseudoo,
-                birthday : bdy,
+                mail         : email,
+                password     : passWord,
+                surname      : lastName,
+                name         : firstName,
+                pseudo       : pseudoo,
+                birthday     : bdy,
               })
             })
             .then(res =>res.json())

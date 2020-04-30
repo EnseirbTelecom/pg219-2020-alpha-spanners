@@ -13,14 +13,14 @@
   <!-- Scrollable page content-->
   <div class="page-content">
    
-    <div class="block-title">Liste des inscrits</div>
+    <div class="block-title">List of users (resp members ?)</div>
       <div class="list links-list">
         <ul>
-          {{#each inscrits}}
-          <a href="#"><li>{{mail}} {{prenom}} {{nom}}</li></a>
-          <div class="block block-strong row">
-            <div class="col"><a class="button convert-form-to-data" href ='#' @click="add('{{nom}}','{{prenom}}','{{_id}}')" >Add {{prenom}}</a></div>
-          </div>
+          {{#each users}}
+            <a href="#"><li>{{mail}} {{surname}} {{name}}</li></a>
+            <div class="block block-strong row">
+              <div class="col"><a class="button convert-form-to-data" href ='#' @click="add('{{surname}}','{{name}}','{{_id}}')" >Add {{name}}</a></div>
+            </div>
           {{/each}}
         </ul>
       </div>
@@ -30,43 +30,43 @@
 <script>
 return {
     async data() {
-      let inscrits = [];
+      let users = [];
       try {
-        inscrits = await fetch("http://localhost:3000/contacts")
+        users = await fetch("http://localhost:3000/users")
             .then(res => res.json())
       }
       catch(err) {
         this.$app.dialog.alert("Error " + err);
       }
 
-      let amis = [];
+      let friends = [];
       try {
-        amis = await fetch("http://localhost:3000/friend")
+        friends = await fetch("http://localhost:3000/friends")
           .then(response => response.json())
       }
       catch(err){
         this.$app.dialog.alert("Error " + err);
       }
       finally{
-        if(amis.length !=0){
-          for (var i=0 ; i <amis.length ; i++){
-            for(var j =0;j<inscrits.length;j++){
-              if(amis[i].destinaireid === inscrits[j]._id && amis[i].expediteur === this.$route.params.myidd){
-                enleve_inscrit=inscrits.splice(j,1)
+        if(friends.length !=0){
+          for (var i=0 ; i <friends.length ; i++){
+            for(var j =0;j<users.length;j++){
+              if(friends[i].receiverId === users[j]._id && friends[i].senderId === this.$route.params.myidd){
+                enleve_inscrit=users.splice(j,1)
               }
-              else if(amis[i].expediteur === inscrits[j]._id && amis[i].destinaireid === this.$route.params.myidd){
-                enleve_inscrit1=inscrits.splice(j,1)
+              else if(friends[i].senderId === users[j]._id && friends[i].receiverId === this.$route.params.myidd){
+                enleve_inscrit1=users.splice(j,1)
               }
             }
           }
         }
-        for(var j=0;j<inscrits.length;j++){
-          if(inscrits[j]._id === this.$route.params.myidd){
-            enleve_inscrit1 = inscrits.splice(j,1)
+        for(var j=0;j<users.length;j++){
+          if(users[j]._id === this.$route.params.myidd){
+            enleve_inscrit1 = users.splice(j,1)
           }
         }
       }
-      return { inscrits: inscrits };
+      return { users: users };
      
     //alert(JSON.stringify(friends))
     return { friends: friends };
@@ -74,21 +74,21 @@ return {
     },
     methods : {
       add: function(nom,prenom,id) {
-          fetch('http://localhost:3000/friend', {
+          fetch('http://localhost:3000/invite', {
               method: 'POST',
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                friendNom: nom,
-                friendPrenom:prenom,
-                monId: this.$route.params.myidd,
-                idFriend : id,
-                monNom:this.$route.params.nomm,
-                monPrenom:this.$route.params.prenomm
+                senderId        : this.$route.params.myidd,
+                senderSurname   : this.$route.params.nomm,
+                senderName      : this.$route.params.prenomm,
+                receiverSurname : nom,
+                receiverName    : prenom,
+                receiverId      : id
               })
           })
           .catch(err => this.$app.dialog.alert('Error ' + err))
           .finally(() => {
-            this.$app.dialog.alert('Votre invitation a bien été envoyé à ' + nom + ' ' + prenom)
+            this.$app.dialog.alert('Friend request sent to ' + nom + ' ' + prenom)
             this.$router.navigate(
             {
               name:'profil',
