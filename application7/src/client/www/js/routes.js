@@ -1,37 +1,36 @@
 
 var routes = [
   {
+    name: 'login',
     path: '/',
-    componentUrl: './pages/page1.html',
+    componentUrl: './pages/login.html',
   },
   {
-    name:'mapage',
-    path:'/home/:obj/:monid/:monnom/:monprenom',
-    componentUrl: './pages/initialpage.html',
+    name:'home',
+    path:'/home',
+    componentUrl: './pages/home.html',
   },
   {
-    path: '/formulaire',
-    componentUrl: './pages/formulaire.html',
+    path: '/register',
+    componentUrl: './pages/register.html',
   },
   {
     path:'/info',
     componentUrl:'./pages/loginForm.html'
   },
   {
-    name:'profil',
-    //path:'/profile/:obj/:monid/:monnom/:monprenom',
-    path:'/profile/:mytoken/:myidd/:nomm/:prenomm',
-    componentUrl:'./pages/accueil.html'
+    name:'addfriends',
+    path:'/addfriends',
+    componentUrl:'./pages/addFriends.html'
   },
   {
     name:'friends',
-    //path: '/ajoutami/:amiId/:tokenn',   //route.params contient {amiId:'',tokenn:''}
-    path: '/ajoutami/:tokenn/:idd/:noom/:prenoom',
-    componentUrl: './pages/profil.html'
+    path: '/friendlist',
+    componentUrl: './pages/friendList.html'
   },
   {
-    name:'mesnotifs',
-    path:'/notif/:tokeen/:myid/:monnomm/:monprenomm',
+    name:'notif',
+    path:'/notif',
     componentUrl:'./pages/notification.html'
   },
 

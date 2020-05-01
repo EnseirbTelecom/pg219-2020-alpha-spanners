@@ -10,10 +10,14 @@ var app = new Framework7({
   // App root data
   data: function () {
     return {
-      user: {
         serverAddress: 'http://localhost:3000',
-      },
-
+        user: {
+          name : "",
+          surname : "",
+          id : "",
+          pseudo : "",
+          birthday : ""
+        }
     };
   },
   // App root methods

@@ -32,36 +32,36 @@ return {
     async data() {
       let users = [];
       try {
-        users = await fetch("http://localhost:3000/users")
+        users = await fetch( app.data.serverAddress +"/users")
             .then(res => res.json())
       }
       catch(err) {
-        this.$app.dialog.alert("Error " + err);
+        app.dialog.alert("Error " + err);
       }
 
       let friends = [];
       try {
-        friends = await fetch("http://localhost:3000/friends")
+        friends = await fetch( app.data.serverAddress +"/friends")
           .then(response => response.json())
       }
       catch(err){
-        this.$app.dialog.alert("Error " + err);
+        app.dialog.alert("Error " + err);
       }
       finally{
         if(friends.length !=0){
           for (var i=0 ; i <friends.length ; i++){
             for(var j =0;j<users.length;j++){
-              if(friends[i].receiverId === users[j]._id && friends[i].senderId === this.$route.params.myidd){
+              if(friends[i].receiverId === users[j]._id && friends[i].senderId === app.data.user.id){
                 enleve_inscrit=users.splice(j,1)
               }
-              else if(friends[i].senderId === users[j]._id && friends[i].receiverId === this.$route.params.myidd){
+              else if(friends[i].senderId === users[j]._id && friends[i].receiverId === app.data.user.id){
                 enleve_inscrit1=users.splice(j,1)
               }
             }
           }
         }
         for(var j=0;j<users.length;j++){
-          if(users[j]._id === this.$route.params.myidd){
+          if(users[j]._id === app.data.user.id){
             enleve_inscrit1 = users.splice(j,1)
           }
         }
@@ -74,34 +74,28 @@ return {
     },
     methods : {
       add: function(nom,prenom,id) {
-          fetch('http://localhost:3000/invite', {
+        fetch( app.data.serverAddress +"/invite", {
               method: 'POST',
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                senderId        : this.$route.params.myidd,
-                senderSurname   : this.$route.params.nomm,
-                senderName      : this.$route.params.prenomm,
+                senderId        : app.data.user.id,
+                senderSurname   : app.data.user.surname,
+                senderName      : app.data.user.name,
                 receiverSurname : nom,
                 receiverName    : prenom,
                 receiverId      : id
               })
           })
-          .catch(err => this.$app.dialog.alert('Error ' + err))
+          .catch(err => app.dialog.alert('Error ' + err))
           .finally(() => {
-            this.$app.dialog.alert('Friend request sent to ' + nom + ' ' + prenom)
-            this.$router.navigate(
-            {
-              name:'profil',
-              params:{mytoken:this.$route.params.obj , myidd:this.$route.params.monid , nomm:this.$route.params.monnom , prenomm:this.$route.params.monprenom},
-            }
-      );
+            app.dialog.alert('Friend request sent to ' + nom + ' ' + prenom)
+            this.$router.navigate('/addfriends');
           })
       },
       nextppage: function(){
         this.$router.navigate(
           {
             name:'friends',
-            params:{tokenn: this.$route.params.mytoken,idd: this.$route.params.myidd,noom: this.$route.params.nomm ,prenoom:this.$route.params.prenomm},
           }
         );
       },

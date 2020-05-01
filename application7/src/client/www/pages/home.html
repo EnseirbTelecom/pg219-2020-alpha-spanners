@@ -73,28 +73,13 @@
 return {
   methods : {
     monprofil : function(){
-      this.$router.navigate(
-        {
-          name:'mapage',
-          params:{obj:this.$route.params.obj,monid:this.$route.params.monid,monnom:this.$route.params.monnom,monprenom:this.$route.params.monprenom},
-        }
-      );
+      this.$router.navigate('/home');
     },
     myfriends : function(){
-      this.$router.navigate(
-        {
-          name:'friends',
-          params:{tokenn:this.$route.params.obj , idd:this.$route.params.monid , noom:this.$route.params.monnom , prenoom:this.$route.params.monprenom},
-        }
-      );
+      this.$router.navigate('/friendlist');
     },
     notification: function(){
-        this.$router.navigate(
-          {
-            name:'mesnotifs',
-            params: {tokeen: this.$route.params.obj , myid : this.$route.params.monid, monnomm:this.$route.params.monnom , monprenomm: this.$route.params.monprenom},
-          }
-        );
+        this.$router.navigate('/notif');
       }
   }
 }

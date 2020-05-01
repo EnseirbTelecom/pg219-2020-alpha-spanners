@@ -94,7 +94,7 @@ return {
           let bdy = document.getElementById('birthday').value
 
           try{
-            let reponse = await fetch("http://localhost:3000/register", {
+            let reponse = await fetch(app.data.serverAddress+"/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -107,9 +107,9 @@ return {
               })
             })
             .then(res =>res.json())
-            .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate('/info'))
+            .then(res => (res.error) ? app.dialog.alert(res.error) : this.$router.navigate('/'))
           }catch(err){
-            this.$app.dialog.alert('Error' + err);
+            app.dialog.alert('Error' + err);
           }
 
     }

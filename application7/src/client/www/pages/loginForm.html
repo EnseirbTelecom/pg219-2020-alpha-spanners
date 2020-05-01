@@ -43,7 +43,7 @@ return {
         let mail = document.getElementById('mail').value
         let password = document.getElementById('password').value
         try{
-          let reponse = await fetch("http://localhost:3000/login", {
+          let reponse = await fetch( app.data.serverAddress +"/login", {
             method  : "POST",
             headers : { "Content-Type": "application/json" },
             body    : JSON.stringify({
@@ -53,11 +53,7 @@ return {
           })
           .then(res =>res.json())
           // .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate('/profile/'+res.token))
-          .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate(
-            {
-              name: 'mapage',
-              params: {obj:res.token , monid : res.id , monnom : res.surname ,monprenom: res.name},
-            }))
+          .then(res => (res.error) ? app.dialog.alert(res.error) : this.$router.navigate('/home'))
 
           //  this.$router.navigate(
           // {
@@ -78,7 +74,7 @@ return {
           // }
         }
         catch(err){
-          this.$app.dialog.alert('Error' + err);
+          app.dialog.alert('Error' + err);
         }
       }
     }
