@@ -18,10 +18,10 @@
       <div class="list links-list">
         <ul>
           {{#each friends}}
-          {{#js_if "this.senderId ===  ../../$route.params.idd"}}
+          {{#js_if "this.senderId ===  app.data.user.id"}}
             <a href="#"><li>{{receiverSurname}} {{receiverName}} </li></a>
           {{else}}
-            {{#js_if "this.receiverId === ../../$route.params.idd"}}
+            {{#js_if "this.receiverId === app.data.user.id"}}
             <a href="#"><li>{{senderSurname}} {{senderName}} </li></a>
             {{/js_if}}
           {{/js_if}}
@@ -51,24 +51,24 @@ return {
   async data() {
     let friends = [];
     try {
-      friends = await fetch("http://localhost:3000/friends")
+      friends = await fetch( app.data.serverAddress +"/friends")
         .then(res => res.json())
     }catch(err) {
-      this.$app.dialog.alert("Error " + err);
+      app.dialog.alert("Error " + err);
     }
     finally{
       let i = friends.length - 1
       while(i>=0){
-        if(friends[i].senderId === this.$route.params.idd && friends[i].status === 'refused'){
+        if(friends[i].senderId === app.data.user.id && friends[i].status === 'refused'){
           enleve_friend1=friends.splice(i,1);
         }
-        else if (friends[i].receiverId === this.$route.params.idd && friends[i].status === 'refused'){
+        else if (friends[i].receiverId === app.data.user.id && friends[i].status === 'refused'){
           enleve_friend2=friends.splice(i,1);
         }
-        else if(friends[i].receiverId === this.$route.params.idd && friends[i].status === 'pending'){
+        else if(friends[i].receiverId === app.data.user.id && friends[i].status === 'pending'){
           enleve_friend3=friends.splice(i,1);
         }
-        else if(friends[i].senderId !== this.$route.params.idd && friends[i].receiverId !== this.$route.params.idd){
+        else if(friends[i].senderId !== app.data.user.id && friends[i].receiverId !== app.data.user.id){
           enleve_friend4=friends.splice(i,1);
         }
         i=i-1;
@@ -79,40 +79,25 @@ return {
   },
   methods: {
     delete : function(idexp,iddest,status){
-      fetch("http://localhost:3000/removefriend/" + idexp + '/' + iddest , {
+      fetch( app.data.serverAddress +"/removefriend/" + idexp + '/' + iddest , {
           method: "DELETE",
       })
-      .catch(err => this.$app.dialog.alert('Error ' + err))
+      .catch(err => app.dialog.alert('Error ' + err))
       .finally(() => {
           if(status === 'pending'){
-            this.$app.dialog.alert("You canceled your friend request")
+            app.dialog.alert("You canceled your friend request")
           }
           else if(status === 'accepted'){
-            this.$app.dialog.alert("This person was removed from your friend list")
+            app.dialog.alert("This person was removed from your friend list")
           }
-          this.$router.navigate(
-            {
-              name:'mapage',
-              params:{obj:this.$route.params.tokenn,monid:this.$route.params.idd,monnom:this.$route.params.noom,monprenom:this.$route.params.prenoom},
-            }
-          );
+          this.$router.navigate('/home');
       });
     },
     previouspage : function(){
-      this.$router.navigate(
-        {
-            name:'profil',
-            params:{mytoken:this.$route.params.tokenn,myidd:this.$route.params.idd,nomm:this.$route.params.noom,prenomm:this.$route.params.prenoom},
-        }
-      );
+      this.$router.navigate('/addfriends');
     },
     monprofil : function(){
-      this.$router.navigate(
-        {
-          name:'mapage',
-          params:{obj:this.$route.params.tokenn,monid:this.$route.params.idd,monnom:this.$route.params.noom,monprenom:this.$route.params.prenoom},
-        }
-      );
+      this.$router.navigate('/home');
     }
   }
 }
