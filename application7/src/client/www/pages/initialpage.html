@@ -53,7 +53,7 @@
     </div>
 
 <div class="page" data-name="home">
-  <div class="navbar navbar-large">
+  <div class="navbar navbar-small">
     <div class="navbar-bg"></div>
     <div class="navbar-inner">
       <div class="left">
@@ -62,14 +62,31 @@
           <i class="icon material-icons if-md">menu</i>
         </a>
       </div>
-      <div class="title-large">
-        <div class="title-large-text">mylocation app</div>
-      </div>
+      <div class="title">
+        <div class="title-text">mylocation app</div>
+      </div>   
     </div>
-</div>
+  </div>
+  <div class="page-content">
+
+    <body>
+      <button id = "getPosition " @click='getPosition' class="col button button-fill button-round button-small">
+        Get current position
+      </button>
+      <p id = "location">Searching location...</p>
+    </body> 
+  </div> 
+</div> 
+
+
 
 </template>
 <script>
+
+console.log('readyornot');
+
+
+//document.addEventListener('deviceready', this.onDeviceReady, false);
 return {
   methods : {
     monprofil : function(){
@@ -89,6 +106,7 @@ return {
       );
     },
     notification: function(){
+<<<<<<< Updated upstream:application7/src/client/www/pages/initialpage.html
         this.$router.navigate(
           {
             name:'mesnotifs',
@@ -98,4 +116,39 @@ return {
       }
   }
 }
+=======
+        this.$router.navigate('/notif');
+      },
+
+    
+    getPosition: function(){
+      console.log('gettheposition');
+        var options = {
+            enableHighAccuracy: true,
+            maximumAge: 3600000
+         }
+         var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
+      
+         function onSuccess(position) {
+          var myelement = document.getElementById('location')
+          myelement.innerHTML = 'Latitude: ' +  position.coords.latitude  + '<br />' +
+                               'Longitude: ' + position.coords.longitude   + '<br />' 
+            //alert('Latitude: '          + position.coords.latitude          + '\n' +
+              // 'Longitude: '         + position.coords.longitude         + '\n' +
+               //'Timestamp: '         + position.timestamp                + '\n');
+         };
+      
+         function onError(error) {
+            alert('code: '    + error.code    + '\n' + 'message: ' + error.message + '\n');
+         }
+    },
+    
+ 
+    
+  },
+
+  
+};
+
+>>>>>>> Stashed changes:application7/src/client/www/pages/home.html
 </script>

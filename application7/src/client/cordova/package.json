@@ -1,6 +1,6 @@
 {
   "name": "io.framework7.myapp",
-  "displayName": "FriendFinder",
+  "displayName": "friendFinder",
   "version": "1.0.0",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
@@ -14,7 +14,11 @@
   "license": "Apache-2.0",
   "dependencies": {
     "cordova-android": "^8.1.0",
+    "cordova-ios": "^5.1.1",
+    "cordova-plugin-add-swift-support": "^2.0.2",
+    "cordova-plugin-geolocation": "^4.0.2",
     "cordova-plugin-keyboard": "^1.2.0",
+    "cordova-plugin-nativegeocoder": "^3.4.1",
     "cordova-plugin-splashscreen": "^5.0.3",
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-wkwebview-engine": "^1.2.1",
@@ -26,9 +30,12 @@
       "cordova-plugin-keyboard": {},
       "cordova-plugin-splashscreen": {},
       "cordova-plugin-wkwebview-file-xhr": {},
-      "cordova-plugin-whitelist": {}
+      "cordova-plugin-whitelist": {},
+      "cordova-plugin-geolocation": {},
+      "cordova-plugin-nativegeocoder": {}
     },
     "platforms": [
+      "ios",
       "android"
     ]
   },

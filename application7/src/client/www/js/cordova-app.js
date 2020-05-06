@@ -134,7 +134,35 @@ var cordovaApp = {
       }
     }, true);
   },
+
+  handlePosition: function(){
+    var el = document.getElementById('getPosition');
+    if(el){
+      el.addEventListener("click", function(){
+      console.log('gettheposition');
+        var options = {
+            enableHighAccuracy: true,
+            maximumAge: 3600000
+         }
+         var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
+      
+         function onSuccess(position) {
+          var myelement = document.getElementById('location')
+          myelement.innerHTML = 'Latitude: ' +  position.coords.latitude  + '<br />' +
+                               'Longitude: ' + position.coords.longitude   + '<br />' 
+         };
+      
+         function onError(error) {
+            alert('code: '    + error.code    + '\n' + 'message: ' + error.message + '\n');
+         }
+    },);
+  }
+  else{
+    console.log('el null');
+  }
+  },
   init: function (f7) {
+    console.log('cordovaapp');
     // Save f7 instance
     cordovaApp.f7 = f7;
 
@@ -146,5 +174,7 @@ var cordovaApp = {
 
     // Handle Keyboard
     cordovaApp.handleKeyboard();
+
+    cordovaApp.handlePosition();
   },
 };
