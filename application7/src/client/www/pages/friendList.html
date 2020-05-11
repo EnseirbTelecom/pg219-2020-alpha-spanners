@@ -44,7 +44,7 @@ return {
   async data() {
     let friends = [];
     try {
-      friends = await fetch( app.data.serverAddress +"/friendlist/" + app.data.user.id)
+      friends = await app.methods.tokenHandlingFetch( app.data.serverAddress +"/friendlist/" + app.data.user.id)
         .then(res => res.json())
     }catch(err) {
       app.dialog.alert("Error " + err);
@@ -55,7 +55,7 @@ return {
   },
   methods: {
     delete : function(idexp,iddest,status){
-      fetch( app.data.serverAddress +"/removefriend/" + idexp + '/' + iddest , {
+      app.methods.tokenHandlingFetch( "/removefriend/" + idexp + '/' + iddest , {
           method: "DELETE",
       })
       .catch(err => app.dialog.alert('Error ' + err))

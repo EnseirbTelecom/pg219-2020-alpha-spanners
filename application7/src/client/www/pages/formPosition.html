@@ -43,7 +43,7 @@
                 <div class="item-inner">
                     <div class="item-title item-label">Date and time of validation</div>
                     <div class="item-input-wrap">
-                      <input type="text" placeholder="Select date and time" readonly="readonly" id="demo-calendar-date-time" @click ='createCalendar'>
+                      <input type="text" placeholder="Select date and time"  readonly="readonly" id="demo-calendar-date-time" >
                     </div>
                 </div>
               </div>
@@ -54,7 +54,7 @@
                 <div class="item-inner">
                   <div class="item-title item-label">Date of departure</div>
                   <div class="item-input-wrap">
-                    <input type="text" placeholder="Select date and time" readonly="readonly" id="demo-calendar-date-time-second" @click ='createCalendarDeparture'>
+                    <input type="text" placeholder="Select date and time" readonly="readonly" id="demo-calendar-date-time-second" >
                   </div>
                 </div>
               </div>
@@ -81,32 +81,37 @@
   </div>
 </template>
 <script>
+
 return{
-  methods :{
-    createCalendar : function() {
+   mounted() {
       var calendarDateTime = app.calendar.create({
         inputEl: '#demo-calendar-date-time',
         timePicker: true,
+        value: [new Date()],
         dateFormat: { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' },
       });
-    },
-    createCalendarDeparture : function() {
+
+
       var calendarDateTime = app.calendar.create({
         inputEl: '#demo-calendar-date-time-second',
         timePicker: true,
-        dateFormat: { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' },
+        value: [new Date(Date.now() +60*60*1000)],
+        dateFormat: "HH::mm d/mm",
       });
     },
+    methods :{
+
     submit: function() {
           window.navigator.geolocation.getCurrentPosition(function(position) {
-            let dateTime = document.getElementById('demo-calendar-date-time').value;
-            let period = document.getElementById('demo-calendar-date-time-second').value;
-            let msg = document.getElementById('msg').value;
-            let latitude = document.getElementById('latitude').value;
-            let longitude = document.getElementById('longitude').value;
+            var dateTime = document.getElementById('demo-calendar-date-time').value;
+            var period = document.getElementById('demo-calendar-date-time-second').value;
+            const msg = document.getElementById('msg').value;
+            const latitude = document.getElementById('latitude').value;
+            const longitude = document.getElementById('longitude').value;
             app.data.user.lat = latitude;
             app.data.user.lng = longitude;
-            let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id , {
+            console.log(dateTime)
+            const response = fetch(app.data.serverAddress + "/position/" + app.data.user.id , {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -118,7 +123,7 @@ return{
                   msg : msg ,
                   status : 'activated',
                 })
-            }).catch(err => app.dialog.alert('Error '+ err))
+            }).catch(err => {app.dialog.alert('Error '+ err); throw err;})
           },function(error){
             app.dialog.alert("Error in localisation N° " + error.code + " : " + error.message);
           });

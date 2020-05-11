@@ -14,16 +14,16 @@
             <div class="list">
               <ul>
                 <li>
-                  <a href="#tab1" class="tab-link">
+                  <a href="#tab1" class="tab-link panel-close">
                     <i class="icon f7-icons if-not-md">square_list_fill</i>
                     <i class="icon material-icons if-md">person_pin_circle</i>
                     <div class="item-inner">
-                    <span class="tabbar-label">Historique des positions</span>
+                    <span class="tabbar-label">Position history</span>
                     </div>
                   </a>
                </li>
               <li>
-                <a href="#tab2" class="button" @click='myfriends'>
+                <a href="#tab2" class="button panel-close" @click='myfriends'>
                   <i class="icon f7-icons if-not-md">gear_alt</i>
                   <i class="icon material-icons if-md">people</i>
                   Friends
@@ -33,7 +33,7 @@
                 </a>
               </li>
               <li>
-                <a href="#tab3" class="button" @click='monprofil'>
+                <a href="#tab3" class="button panel-close" @click='monprofil'>
                   <i class="icon f7-icons if-not-md">house_fill</i>
                   <i class="icon material-icons if-md">home</i>
                   Home
@@ -43,14 +43,31 @@
                 </a>
               </li>
               <li>
-                <a href="#tab4" class="button" @click='notification'>The received requests</a>
-                <a href="#tab5" class="button" @click='sentRequest'>The sent requests</a>
-                <a href="#tab6" class="button" @click='addFriend'>add a friend</a>
-                <a href="#tab7" class="button" @click='activatePosition'>Activate my position</a>
-                <a href="#tab7" class="button" @click='obtainPosition'>Obtain my position</a>
-                <a href="#tab8" class="button" @click='positionInMap'>See my position in a map</a>
-                <a href="#tab8" class="button" @click='pastposition'>Historical of positions</a>
-                <a href="#tab9" class="button">friends</a>
+                <a href="#tab4" class="button panel-close" @click='notification'>
+                  <i class="icon f7-icons if-not-md">bell</i>
+                  <i class="icon material-icons if-md">notifications</i>
+                  notifications
+                </a>
+              </li>
+              <li>
+                <a href="#tab5" class="button panel-close"  @click='disconnect'>
+                  <i class="icon f7-icons if-not-md">xmark_circle_fill</i>
+                  <i class="icon material-icons if-md">cancel</i>
+                  Disconnect
+                  <div class="item-inner">
+                    <span class="tabbar-label">Disconnect</span>
+                   </div>
+                </a>
+              </li>
+              <li>
+                <a href="#tab6" class="button panel-close" @click='sentRequest'>The sent requests</a>
+                <a href="#tab7" class="button panel-close" @click='addFriend'>add a friend</a>
+                <a href="#tab8" class="button panel-close" @click='activatePosition'>Activate my position</a>
+                <a href="#tab9" class="button panel-close" @click='obtainPosition'>Obtain my position</a>
+                <a href="#tab10" class="button panel-close" @click='positionInMap'>See my position in a map</a>
+                <a href="#tab11" class="button panel-close" @click='pastposition'>Historical of positions</a>
+                <a href="#tab12" class="button panel-close">friends</a>
+                <a href="#tab13" class="button panel-close" @click='notification'>
               </li>
              </ul>
             </div>
@@ -78,7 +95,7 @@
 
   <div class="page-content">
 
-  <div class="block-title">friend's position</div>
+  <div class="block-title">Friends' position</div>
     <div class="list links-list">
       <ul>
         {{#each friendsposition}}
@@ -103,6 +120,7 @@ return {
           .then(res => res.json());
       } catch(err) {
         this.$app.dialog.alert("Error " + err);
+        throw err;
       }
       return { friendsposition: friendsposition };
     },
@@ -126,7 +144,11 @@ return {
       this.$router.navigate('/friendlist')
     },
     notification: function(){
-        this.$router.navigate('/notif')
+      this.$router.navigate('/notif');
+    },
+    disconnect: function(){
+      app.dialog.confirm("Are you sure ?", "Logout", () => this.$router.navigate('/'))
+      
     },
     sentRequest:function(){
       this.$router.navigate('/sentRequest')
@@ -143,6 +165,7 @@ return {
         params : {idfriend : idfriend}
       })
     }
+        
   }
 }
 </script>

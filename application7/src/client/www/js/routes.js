@@ -4,11 +4,13 @@ var routes = [
     name: 'login',
     path: '/',
     componentUrl: './pages/login.html',
+    beforeEnter: (routeTo, routeFrom, resolve, reject) => {app.methods.deleteUserData(); resolve()}
   },
   {
     name:'home',
     path:'/home',
     componentUrl: './pages/home.html',
+    beforeEnter: (a,b,c,d) => {app.methods.checkTokenOnRoute(a,b,c,d)}
   },
   {
     path: '/register',
@@ -21,17 +23,20 @@ var routes = [
   {
     name:'addfriends',
     path:'/addfriends',
-    componentUrl:'./pages/addFriends.html'
+    componentUrl:'./pages/addFriends.html',
+    beforeEnter: (a,b,c,d) => {app.methods.checkTokenOnRoute(a,b,c,d)}
   },
   {
     name:'friends',
     path: '/friendlist',
-    componentUrl: './pages/friendList.html'
+    componentUrl: './pages/friendList.html',
+    beforeEnter: (a,b,c,d) => {app.methods.checkTokenOnRoute(a,b,c,d)}
   },
   {
     name:'notif',
     path:'/notif',
-    componentUrl:'./pages/notification.html'
+    componentUrl:'./pages/notification.html',
+    beforeEnter: (a,b,c,d) => {app.methods.checkTokenOnRoute(a,b,c,d)}
   },
   {
     name:'sentRequests',

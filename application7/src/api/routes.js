@@ -1,5 +1,4 @@
 /* File that is in charge of implementing the routes to the app*/
-const request = require('request');
 var CryptoJS = require("crypto-js");
 const JWT_KEY = 'wGuyfJdbzBMyBwpXMjEXnKQQmKlXsiItxzLVIfC5qE97V6l6S0LzT9bzixv'
 let bcrypt = require('bcrypt')
@@ -7,20 +6,35 @@ let jwt = require('jsonwebtoken')
 const ObjectID = require('mongodb').ObjectID
 const utils = require('./utils.js')
 
-//utils.convertTime
+
+function verifyToken(req,res,next){
+    if ( req.query.token){
+        jwt.verify(req.query.token,JWT_KEY, (err,data) => {
+            if (err){
+                return res.status(400).json({error:err.name})
+            } else {
+                req.userId = data.userId;
+                next();
+            }
+        });
+    } else {
+        return res.status(400).json({error:"no token"})
+    }
+}
+
 function implement(app,database){
 
     // Route to get the status of an invitation
-    app.get("/invite/:senderId/:receiverId", (req, res) => {
+    app.get("/invite/:senderId/:receiverId", verifyToken, (req, res) => {
         database.collection('friends').findOne({receiverId : req.params.receiverId, senderId : req.params.senderId})
             .then(item => res.json(item))
-            .catch(err => console.log("err" + err))
+            .catch(err => {console.log("err" + err); throw err;})
         console.log('req.params.receiverId : ' + req.params.receiverId);
         console.log('req.params.senderId : ' + req.params.senderId);
     })
 
-    // Route to refuse an invitation or delete a friend
-    app.delete('/removefriend/:senderId/:receiverId',(req,res) => {
+    // Route to delete a friend
+    app.delete('/removefriend/:senderId/:receiverId', verifyToken, (req,res) => {
         database.collection('friends').deleteOne({receiverId : req.params.receiverId, senderId : req.params.senderId})
             .then(command => res.status(201).json(req.params.senderId))
         console.log('req.params.receiverId : ' + req.params.receiverId);
@@ -28,7 +42,7 @@ function implement(app,database){
     })
 
 
-    app.put('/time/:id',(req,res) => {
+    app.put('/time/:id',verifyToken, (req,res) => {
       const beginEnd= {
         dateTime : req.body.dateTime,
          period : req.body.period
@@ -39,12 +53,12 @@ function implement(app,database){
     })
 
     // position active d'un user
-    app.get('/position/:id',(req,res) => {
+    app.get('/position/:id', (req,res) => {
       database.collection('positions').findOne(
         {
           $and : [ { userId : {$eq : req.params.id} } , { status : {$eq : 'activated' } } ]
         }).then(position => (position) ? res.json(position) : res.status(404).json({ error: "You must activate your position first" }))
-				  .catch(err => console.log("err" + err))
+				  .catch(err => {console.log("err" + err); throw err;})
     })
 
     //toutes les positions des amis
@@ -58,18 +72,20 @@ function implement(app,database){
                ]
         }).toArray().then(function(friends){
                     if(friends.length !== 0){
-                      var arrayfriends = []
-                      for(var i=0;i<friends.length;i++){
-                        if(friends[i].senderId === req.params.id){
-                          //arrayfriends.push(friends[i].receiverSurname)
-                          arrayfriends.push(friends[i].receiverId)
-                        }
-                        else if (friends[i].receiverId === req.params.id){
-                          //arrayfriends.push(friends[i].senderSurname)
-                          arrayfriends.push(friends[i].senderId)
-                        }
+                      res.json({})
+                    }
+                    var arrayfriends = []
+                    for(var i=0;i<friends.length;i++){
+                      if(friends[i].senderId === req.params.id){
+                        //arrayfriends.push(friends[i].receiverSurname)
+                        arrayfriends.push(friends[i].receiverId)
+                      }
+                      else if (friends[i].receiverId === req.params.id){
+                        //arrayfriends.push(friends[i].senderSurname)
+                        arrayfriends.push(friends[i].senderId)
                       }
                     }
+                    
 
                     database.collection('positions').find(
                       {
@@ -106,6 +122,7 @@ function implement(app,database){
                     }
                   }
                 }
+                res.status(200).json({status : "ok"});
               })
     })
 
@@ -165,7 +182,7 @@ function implement(app,database){
 
     //FIXME not the good way to accept an invite ?
     // route to accept invites
-     app.put('/updateinvite',(req,res) => {
+     app.put('/updateinvite',verifyToken,(req,res) => {
         const newValue ={
             senderId        : req.body.senderId,
             senderSurname   : req.body.senderSurname,
@@ -177,7 +194,7 @@ function implement(app,database){
         }
         database.collection('friends').update({senderId : req.body.senderId , receiverId : req.body.receiverId },{$set : newValue})
                                     .then(command => res.json(req.body))
-                                    .catch(err => console.log("Error " + err))
+                                    .catch(err => {console.log("Error " + err); throw err;})
     })
 
     app.get('/sentRequest/:id', (req,res) => {
@@ -196,14 +213,14 @@ function implement(app,database){
     })
 
     // route that returns the friendlist
-    app.get('/notif/:usrId',(req,res) => {
+    app.get('/notif/:usrId', verifyToken, (req,res) => {
         database.collection('friends').find(
           {
            $and : [ { receiverId : {$eq : req.params.usrId} } , { status : {$eq : 'pending' } } ]
          }).toArray().then(friend => res.json(friend))
     })
 
-    app.get('/friends/addFriends/:myId',(req,res) => {
+    app.get('/friends/addFriends/:myId', verifyToken, (req,res) => {
               database.collection('friends').find({
                     $and : [
                              {
@@ -234,7 +251,7 @@ function implement(app,database){
     })
 
     //route to send an invite
-    app.post('/invite', (req,res) => {
+    app.post('/invite', verifyToken, (req,res) => {
         let newFriend = {
             senderId        : req.body.senderId,
             senderSurname   : req.body.senderSurname,
@@ -248,10 +265,23 @@ function implement(app,database){
             .then(command => res.status(201).json(newFriend)) //NOTE do we really need to send back the data ?
     })
 
+    app.get("/users/:id", verifyToken, (req, res) => {
+        database.collection('users').findOne({ _id: ObjectID(req.params.id) })
+        .then(item => res.json(item))
+        .catch(err => {console.log("err" + err); throw err;})
+    })
+
+    //route that returns a list of users
+    app.get('/users', verifyToken, (req,res) =>{
+        //FIXME no, you don't send a whole database to the client, at least add a limit on the number of rows
+        database.collection('users').find().toArray()
+        .then(users => res.json(users))
+    })
+
     app.post('/login',(req,res) => {
         let infoLogin = {
-        mail : req.body.mail,
-        password : req.body.password,
+            mail : req.body.mail,
+            password : req.body.password,
         }
 
         if(infoLogin.mailUser === '' || infoLogin.passwordUser === ''){
@@ -266,23 +296,23 @@ function implement(app,database){
 
                    let decryptedPasswordRegister = CryptoJS.AES.decrypt(infoLogin.password,'secret key 123');
                    let originalPasswordRegister = decryptedPasswordRegister.toString(CryptoJS.enc.Utf8);
-
-                    if(originalPasswordLogin === originalPasswordRegister){
-                          const token = jwt.sign(
-                            {
-                              mailToken:usr.mail,
-                              idToken:usr._id
-                            },
-                            JWT_KEY,
-                            {
-                              expiresIn:'24h'
-                            }
-                          );
-                          return res.status(200).json({token : token, id : usr._id, surname:usr.surname, name:usr.name})
-                    }
-                    else{
-                      res.status(400).json({error:"Incorrect password"})
-                    }
+                   const expireDate = Date.now() + (24* 60 * 60 * 1000); //the expiration date of the token in ms
+                  if(originalPasswordLogin === originalPasswordRegister){
+                    const token = jwt.sign(
+                      {
+                          exp: Math.floor(expireDate/1000) + 10, 
+                          // the expiration date in s 
+                          // we add a 10s margin  because we prefer that the client handle expiration rather 
+                          // than the server responding invalid_token
+                          userId: usr._id
+                      },
+                      JWT_KEY
+                    );
+                    return res.status(200).json({token : token, tokenExp: expireDate, id : usr._id, surname:usr.surname, name:usr.name})
+                  }
+                  else{
+                    res.status(400).json({error:"Incorrect password"})
+                  }
                 }
                 else{
                   return res.status(400).json({error:"You should sign up before login"})

@@ -32,7 +32,7 @@ return {
     async data() {
       let users = [];
       try {
-        users = await fetch( app.data.serverAddress + "/friends/addFriends/" + app.data.user.id)
+        users = await app.methods.tokenHandlingFetch( "/friends/addFriends/" + app.data.user.id)
             .then(res => res.json())
       }
       catch(err) {
@@ -44,7 +44,7 @@ return {
     },
     methods : {
       add: function(nom,prenom,id) {
-        fetch( app.data.serverAddress +"/invite", {
+        app.methods.tokenHandlingFetch( "/invite", {
               method: 'POST',
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({

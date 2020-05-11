@@ -61,20 +61,16 @@ return {
         }
         else {
           localStorage.token = jsonRes.token;
+          localStorage.tokenExp = jsonRes.tokenExp;
           app.data.user = {
             name : jsonRes.name,
             surname : jsonRes.surname,
             id : jsonRes.id,
             pseudo : "",
             birthday : "",
-            lat : "",
-            lng : ""
           }
-          this.$router.navigate(
-            {
-              name: 'home',
-              params: {myid : jsonRes.id},
-            })
+          localStorage.userJson = JSON.stringify(app.data.user)
+          this.$router.navigate('/home')
         }
       },
     //},
@@ -98,6 +94,7 @@ return {
         }
         catch(err){
           app.dialog.alert('Error' + err);
+          throw err;
         }
       }
     }
