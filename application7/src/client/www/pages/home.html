@@ -1,7 +1,7 @@
 <template>
+<div class="page" data-name="home">
   <div id="app">
-    <!-- Left panel with cover effect-->
-    <div id = "my-panel" class="panel panel-left panel-cover theme-color panel-init">
+     <div id = "my-panel" class="panel panel-left panel-cover theme-color panel-init">
       <div class="view">
         <div class="page">
           <div class="navbar">
@@ -21,7 +21,7 @@
                     <span class="tabbar-label">Historique des positions</span>
                     </div>
                   </a>
-              </li>
+               </li>
               <li>
                 <a href="#tab2" class="button" @click='myfriends'>
                   <i class="icon f7-icons if-not-md">gear_alt</i>
@@ -43,7 +43,14 @@
                 </a>
               </li>
               <li>
-                <a href="#tab4" class="button" @click='notification'>notifications</a>
+                <a href="#tab4" class="button" @click='notification'>The received requests</a>
+                <a href="#tab5" class="button" @click='sentRequest'>The sent requests</a>
+                <a href="#tab6" class="button" @click='addFriend'>add a friend</a>
+                <a href="#tab7" class="button" @click='activatePosition'>Activate my position</a>
+                <a href="#tab7" class="button" @click='obtainPosition'>Obtain my position</a>
+                <a href="#tab8" class="button" @click='positionInMap'>See my position in a map</a>
+                <a href="#tab8" class="button" @click='pastposition'>Historical of positions</a>
+                <a href="#tab9" class="button">friends</a>
               </li>
              </ul>
             </div>
@@ -52,7 +59,6 @@
       </div>
     </div>
 
-<div class="page" data-name="home">
   <div class="navbar navbar-large">
     <div class="navbar-bg"></div>
     <div class="navbar-inner">
@@ -62,25 +68,81 @@
           <i class="icon material-icons if-md">menu</i>
         </a>
       </div>
+
       <div class="title-large">
         <div class="title-large-text">mylocation app</div>
       </div>
-    </div>
-</div>
 
+    </div>
+  </div>
+
+  <div class="page-content">
+
+  <div class="block-title">friend's position</div>
+    <div class="list links-list">
+      <ul>
+        {{#each friendsposition}}
+        <a href="#"><li>{{userName}} se trouve à la latitude {{latitude}} et à la longitude {{longitude}}</li></a>
+        <div class="block block-strong row">
+          <div class="col"><a class="button convert-form-to-data" href ='#' @click="visualizeOnmap('{{userId}}')">Visualiser sur une carte</a></div>
+        </div>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+
+</div>
 </template>
 <script>
 return {
   methods : {
+    async data (){
+      let friendsposition = [];
+      try {
+        friendsposition = await fetch(app.data.serverAddress + "/friendsposition/" + app.data.user.id)
+          .then(res => res.json());
+      } catch(err) {
+        this.$app.dialog.alert("Error " + err);
+      }
+      return { friendsposition: friendsposition };
+    },
+    obtainPosition : function() {
+      let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id)
+                        .then(res => res.json())
+                        .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$app.dialog.alert(res.latitude + ' ' + res.longitude))
+    },
+    positionInMap : function() {
+      let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id)
+                        .then(res => res.json())
+                        .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate('/map'))
+    },
+    activatePosition : function(){
+      this.$router.navigate('/formPosition')
+    },
     monprofil : function(){
       this.$router.navigate('/home');
     },
     myfriends : function(){
-      this.$router.navigate('/friendlist');
+      this.$router.navigate('/friendlist')
     },
     notification: function(){
-        this.$router.navigate('/notif');
-      }
+        this.$router.navigate('/notif')
+    },
+    sentRequest:function(){
+      this.$router.navigate('/sentRequest')
+    },
+    addFriend : function(){
+      this.$router.navigate('/addfriends')
+    },
+    pastposition : function(){
+      this.$router.navigate('/pastpositions')
+    },
+    visualizeOnmap : function(idfriend){
+      this.$router.navigate({
+        name : 'friendmap',
+        params : {idfriend : idfriend}
+      })
+    }
   }
 }
 </script>

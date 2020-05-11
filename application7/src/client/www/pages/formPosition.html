@@ -1,0 +1,129 @@
+<template>
+  <div class="page" data-name="formPosition">
+    <div class="appbar">
+      <div class="left">
+        <a href="#" class="link back">
+          <i class="icon icon-back"></i>
+          Back
+          <span class="if-not-md">Back</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="block-title">Position form</div>
+        <form class="list" id="my-form">
+          <ul>
+
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">Latitude</div>
+                  <div class="item-input-wrap">
+                    <input type="text" name="latitude" id="latitude" placeholder="Your latitude">
+                  </div>
+                </div>
+              </div>
+            </li>
+
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">Longitude</div>
+                  <div class="item-input-wrap">
+                    <input type="text" name="longitude" id="longitude" placeholder="Your longitude">
+                  </div>
+                </div>
+              </div>
+            </li>
+
+
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                    <div class="item-title item-label">Date and time of validation</div>
+                    <div class="item-input-wrap">
+                      <input type="text" placeholder="Select date and time" readonly="readonly" id="demo-calendar-date-time" @click ='createCalendar'>
+                    </div>
+                </div>
+              </div>
+            </li>
+
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">Date of departure</div>
+                  <div class="item-input-wrap">
+                    <input type="text" placeholder="Select date and time" readonly="readonly" id="demo-calendar-date-time-second" @click ='createCalendarDeparture'>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">Optional message</div>
+                  <div class="item-input-wrap">
+                    <input type="text" name="msg" id="msg" placeholder="Optional message">
+                  </div>
+                </div>
+              </div>
+            </li>
+
+          </ul>
+        </form>
+
+        <div class="block block-strong row">
+           <div class="col"><a class="button convert-form-to-data" href="#" @click ='submit'>Submit</a></div>
+        </div>
+    </div>
+  </div>
+</template>
+<script>
+return{
+  methods :{
+    createCalendar : function() {
+      var calendarDateTime = app.calendar.create({
+        inputEl: '#demo-calendar-date-time',
+        timePicker: true,
+        dateFormat: { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' },
+      });
+    },
+    createCalendarDeparture : function() {
+      var calendarDateTime = app.calendar.create({
+        inputEl: '#demo-calendar-date-time-second',
+        timePicker: true,
+        dateFormat: { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' },
+      });
+    },
+    submit: function() {
+          window.navigator.geolocation.getCurrentPosition(function(position) {
+            let dateTime = document.getElementById('demo-calendar-date-time').value;
+            let period = document.getElementById('demo-calendar-date-time-second').value;
+            let msg = document.getElementById('msg').value;
+            let latitude = document.getElementById('latitude').value;
+            let longitude = document.getElementById('longitude').value;
+            app.data.user.lat = latitude;
+            app.data.user.lng = longitude;
+            let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id , {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  userName : app.data.user.name,
+                  latitude : latitude,
+                  longitude : longitude,
+                  dateTime : dateTime,
+                  period : period,
+                  msg : msg ,
+                  status : 'activated',
+                })
+            }).catch(err => app.dialog.alert('Error '+ err))
+          },function(error){
+            app.dialog.alert("Error in localisation N° " + error.code + " : " + error.message);
+          });
+          this.$router.navigate('/home');
+    }
+  }
+}
+</script>

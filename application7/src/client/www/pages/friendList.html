@@ -20,27 +20,20 @@
           {{#each friends}}
           {{#js_if "this.senderId ===  app.data.user.id"}}
             <a href="#"><li>{{receiverSurname}} {{receiverName}} </li></a>
+            <div class="block block-strong row">
+              <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">Delete {{receiverSurname}}</a></div>
+            </div>
           {{else}}
             {{#js_if "this.receiverId === app.data.user.id"}}
             <a href="#"><li>{{senderSurname}} {{senderName}} </li></a>
+            <div class="block block-strong row">
+              <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">Delete {{senderSurname}}</a></div>
+            </div>
             {{/js_if}}
           {{/js_if}}
-          <div class="block block-strong row">
-            <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">
-              {{#js_if "this.status === 'pending'"}}
-                    Annuler la demande d'invitation
-              {{else}}
-                  {{#js_if "this.status === 'pending'"}}
-                    Supprimer ce contact
-                  {{/js_if}}
-              {{/js_if}}</a></div>
-          </div>
-          {{/each}}
+          {{/each}
         </ul>
       </div>
-   <div class="block">
-      <a href="#tab1" class="col button button-small button-round button-fill" @click = 'previouspage'>Add a friend</a>
-   </div> 
     </div>
 
    </div>
@@ -51,31 +44,14 @@ return {
   async data() {
     let friends = [];
     try {
-      friends = await fetch( app.data.serverAddress +"/friends")
+      friends = await fetch( app.data.serverAddress +"/friendlist/" + app.data.user.id)
         .then(res => res.json())
     }catch(err) {
       app.dialog.alert("Error " + err);
     }
     finally{
-      let i = friends.length - 1
-      while(i>=0){
-        if(friends[i].senderId === app.data.user.id && friends[i].status === 'refused'){
-          enleve_friend1=friends.splice(i,1);
-        }
-        else if (friends[i].receiverId === app.data.user.id && friends[i].status === 'refused'){
-          enleve_friend2=friends.splice(i,1);
-        }
-        else if(friends[i].receiverId === app.data.user.id && friends[i].status === 'pending'){
-          enleve_friend3=friends.splice(i,1);
-        }
-        else if(friends[i].senderId !== app.data.user.id && friends[i].receiverId !== app.data.user.id){
-          enleve_friend4=friends.splice(i,1);
-        }
-        i=i-1;
-      }
+      return { friends: friends };
     }
-    //alert(JSON.stringify(friends))
-    return { friends: friends };
   },
   methods: {
     delete : function(idexp,iddest,status){
@@ -84,12 +60,6 @@ return {
       })
       .catch(err => app.dialog.alert('Error ' + err))
       .finally(() => {
-          if(status === 'pending'){
-            app.dialog.alert("You canceled your friend request")
-          }
-          else if(status === 'accepted'){
-            app.dialog.alert("This person was removed from your friend list")
-          }
           this.$router.navigate('/home');
       });
     },

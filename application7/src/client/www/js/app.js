@@ -16,7 +16,9 @@ var app = new Framework7({
           surname : "",
           id : "",
           pseudo : "",
-          birthday : ""
+          birthday : "",
+          lat:"",
+          lng:""
         }
     };
   },
@@ -25,6 +27,7 @@ var app = new Framework7({
 /*     helloWorld: function () {
       app.dialog.alert('Hello World!');
     }, */
+
   },
   // App routes
   routes: routes,
@@ -61,6 +64,46 @@ $$('#my-login-screen .login-button').on('click', function () {
   // Alert username and password
   app.dialog.alert('Username: ' + username + '<br>Password: ' + password);
 });
+
+$$(document).on('page:init', '.page[data-name="testmap"]', function (e) {
+  let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id)
+                    .then(res => res.json())
+                    .then(function(res){
+                              alert(res.latitude + ' ' + res.longitude);
+                              var map = new google.maps.Map(document.getElementById('map'), {
+                                zoom: 8,
+                                center: {lat: parseInt(res.latitude), lng: parseInt(res.longitude)}
+                              });
+
+
+                              var myLatLng = { lat: parseInt(res.latitude), lng: parseInt(res.longitude) };
+                              var marker = new google.maps.Marker(
+                                  {
+                                    position: myLatLng,
+                                    map: map,
+                                  });
+                    })
+
+});
+
+$$(document).on('page:init', '.page[data-name="formPosition"]', function (e) {
+  window.navigator.geolocation.getCurrentPosition(function(position) {
+        var inputLatitude = document.getElementById('latitude')
+        var inputLongitude = document.getElementById('longitude')
+        inputLatitude.value = position.coords.latitude
+        inputLongitude.value = position.coords.longitude
+        alert('hello')
+  },function(error){
+       alert("Error in localisation N° " + error.code + " : " + error.message);
+   });
+});
+
+$$(document).on('page:init', '.page[data-name="home"]', function (e) {
+  fetch(app.data.serverAddress +"/positions", {
+            method: "DELETE",
+          })
+          .catch(err => this.$app.dialog.alert('Error ' + err))
+})
 
 app.views.create('.view-main',{
   url:'/',

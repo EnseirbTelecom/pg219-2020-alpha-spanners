@@ -1,0 +1,90 @@
+<template>
+<div class="page" data-name="home">
+  <div class="appbar">
+    <div class="appbar-inner">
+      <div class="left">
+        <a href="#" class="link icon-only panel-open" data-panel="left">
+          <i class="icon f7-icons if-not-md">menu</i>
+          <i class="icon material-icons if-md">menu</i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="block-title">Feedbacks of sent requests</div>
+  <div class="list">
+    <ul>
+      {{#each friends}}
+        {{#js_if "this.status ===  'accepted'"}}
+      <li class="swipeout">
+        <div class="item-content swipeout-content">
+          <div class="item-inner">
+            <div class="item-title">{{receiverSurname}} accepted your invitation</div>
+          </div>
+        </div>
+        <div class="swipeout-actions-left">
+          <a href="#" class="swipeout-delete">Delete</a>
+        </div>
+        {{else}}
+          {{#js_if "this.status ===  'refused'"}}
+          <li class="swipeout">
+            <div class="item-content swipeout-content">
+              <div class="item-inner">
+                <div class="item-title">{{receiverSurname}} refused your invitation</div>
+              </div>
+            </div>
+            <div class="swipeout-actions-left">
+              <a href="#" class="swipeout-delete">Delete</a>
+            </div>
+          </li>
+          {{/js_if}}
+         {{/js_if}}
+      {{/each}}
+    </ul>
+  </div>
+
+  <div class="block-title">Sent requests</div>
+  <div class="list links-list">
+    <ul>
+      {{#each friends}}
+       {{#js_if "this.status ===  'pending'"}}
+        <a href="#"><li> {{receiverSurname}}</li></a>
+          <div class="block block-strong row">
+            <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')"> Cancel invitation </a></div>
+          </div>
+        {{/js_if}}
+      {{/each}}
+    </ul>
+  </div>
+
+</div>
+</template>
+
+<script>
+return{
+  async data() {
+    let friends = [];
+    try {
+      friends = await fetch( app.data.serverAddress +"/sentRequest/" + app.data.user.id)
+        .then(res => res.json())
+    }catch(err) {
+      app.dialog.alert("Error " + err);
+    }
+    finally{
+      return { friends: friends };
+    }
+  },
+  methods: {
+    delete : function(idexp,iddest,status){
+      fetch( app.data.serverAddress + "/removefriend/" + idexp + '/' + iddest , {
+          method: "DELETE",
+      })
+      .catch(err => app.dialog.alert('Error ' + err))
+      .finally(() => {
+        app.dialog.alert('Canceled invitation !')
+        this.$router.navigate('/home');
+      });
+    }
+  }
+}
+</script>

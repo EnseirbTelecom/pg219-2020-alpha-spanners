@@ -33,6 +33,36 @@ var routes = [
     path:'/notif',
     componentUrl:'./pages/notification.html'
   },
+  {
+    name:'sentRequests',
+    path:'/sentRequest',
+    componentUrl:'./pages/sentRequest.html'
+  },
+  {
+    name:'position',
+    path:'/formPosition',
+    componentUrl:'./pages/formPosition.html'
+  },
+  {
+    name:'testmap',
+    path:'/map',
+    componentUrl:'./pages/carte.html'
+  },
+  {
+    name:'pastpositions',
+    path:'/pastpositions',
+    componentUrl:'./pages/pastposition.html'
+  },
+  {
+    name:'latlngOnmap',
+    path:'/positiononmap/:idposition',
+    componentUrl:'./pages/positiononmap.html'
+  },
+  {
+    name:'friendmap',
+    path:'/position/:idfriend',
+    componentUrl:'/pages/friendcarte.html'
+  },
 
   // {
   //   path: '/about/',
