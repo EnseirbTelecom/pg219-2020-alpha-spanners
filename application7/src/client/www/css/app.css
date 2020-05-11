@@ -21,22 +21,22 @@
 
 @font-face {
   font-family: Poppins-Regular;
-  src: url('../fonts/poppins/Poppins-Regular.ttf'); 
+  src: url('../fonts/poppins/Poppins-Regular.ttf');
 }
 
 @font-face {
   font-family: Poppins-Medium;
-  src: url('../fonts/poppins/Poppins-Medium.ttf'); 
+  src: url('../fonts/poppins/Poppins-Medium.ttf');
 }
 
 @font-face {
   font-family: Poppins-Bold;
-  src: url('../fonts/poppins/Poppins-Bold.ttf'); 
+  src: url('../fonts/poppins/Poppins-Bold.ttf');
 }
 
 @font-face {
   font-family: Poppins-SemiBold;
-  src: url('../fonts/poppins/Poppins-SemiBold.ttf'); 
+  src: url('../fonts/poppins/Poppins-SemiBold.ttf');
 }
 
 
@@ -46,8 +46,8 @@
 [ RESTYLE TAG ]*/
 
 * {
-	margin: 0px; 
-	padding: 0px; 
+	margin: 0px;
+	padding: 0px;
 	box-sizing: border-box;
 }
 
@@ -177,7 +177,7 @@ iframe {
 }
 
 .container-login100 {
-  width: 100%;  
+  width: 100%;
   min-height: 100vh;
   display: -webkit-box;
   display: -webkit-flex;
@@ -188,7 +188,7 @@ iframe {
   justify-content: center;
   align-items: center;
   padding: 15px;
-  background: #f2f2f2;  
+  background: #f2f2f2;
 }
 
 .wrap-login100 {
@@ -248,7 +248,7 @@ iframe {
   padding: 0 5px;
 }
 
-/*---------------------------------------------*/ 
+/*---------------------------------------------*/
 .focus-input100 {
   position: absolute;
   display: block;
@@ -503,5 +503,29 @@ iframe {
   }
 }
 
+.coordinates{
+  width:350px;
+}
 
+.coordinates .card-header{
+  background:	#fafafa;
+}
 
+.coordinates .card-footer {
+    background:#fafafa;
+}
+
+.map {
+  height : 900px;
+}
+
+/* .demo-card-header-pic .card-header {
+  height: 40vw;
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+
+.demo-card-header-pic .card-content-padding .date{
+  color: #8e8e93;
+} */

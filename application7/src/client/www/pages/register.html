@@ -17,9 +17,9 @@
             <li>
               <div class="item-content item-input">
                 <div class="item-inner">
-                  <div class="item-title item-label">Nom</div>
+                  <div class="item-title item-label">Lastname</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="nom" id='nom' placeholder="Votre nom">
+                    <input type="text" name="nom" id='nom' placeholder="Your lastname">
                   </div>
                 </div>
               </div>
@@ -27,9 +27,9 @@
             <li>
               <div class="item-content item-input">
                 <div class="item-inner">
-                  <div class="item-title item-label">Prénom</div>
+                  <div class="item-title item-label">Firstname</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="prenom" id='prenom' placeholder="Votre prénom">
+                    <input type="text" name="prenom" id='prenom' placeholder="Your firstname">
                    </div>
                  </div>
                </div>
@@ -39,7 +39,7 @@
                 <div class="item-inner">
                   <div class="item-title item-label">Pseudo</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="pseudo" id="pseudo" placeholder="Votre pseudo">
+                    <input type="text" name="pseudo" id="pseudo" placeholder="Your pseudo">
                   </div>
                 </div>
               </div>
@@ -49,7 +49,7 @@
                 <div class="item-inner">
                   <div class="item-title item-label">E-mail</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="mail" id="mail" placeholder="Votre E-mail">
+                    <input type="text" name="mail" id="mail" placeholder="Your Email">
                   </div>
                 </div>
               </div>
@@ -57,9 +57,9 @@
             <li>
               <div class="item-content item-input">
                 <div class="item-inner">
-                  <div class="item-title item-label">Mot de passe</div>
+                  <div class="item-title item-label">Password</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="password" id="password" placeholder="Votre mot de passe">
+                    <input type="password" name="password" id="password" placeholder="Your password">
                   </div>
                 </div>
               </div>
@@ -67,18 +67,18 @@
             <li>
               <div class="item-content item-input">
                 <div class="item-inner">
-                  <div class="item-title item-label">Date d'anniversaire</div>
+                  <div class="item-title item-label">Birthday</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="birthday" id="birthday" placeholder="Votre date d'anniversaire">
+                    <input type="date" name="birthday" id="birthday" placeholder="Your birthday" value="2020-05-04">
                   </div>
                 </div>
               </div>
-           </li>
+            </li>
           </ul>
-         </form>
-         <div class="block block-strong row">
+        </form>
+        <div class="block block-strong row">
            <div class="col"><a class="button convert-form-to-data" href="#" @click = "submit">Submit</a></div>
-         </div>
+        </div>
     </div>
 </template>
 
@@ -87,19 +87,19 @@ return {
   methods:{
     submit: async function() {
           let email = document.getElementById('mail').value;
-          let passWord = document.getElementById('password').value;
+          let password = CryptoJS.AES.encrypt(document.getElementById('password').value,'secret key 123').toString();
           let lastName = document.getElementById('nom').value;
           let firstName = document.getElementById('prenom').value;
           let pseudoo = document.getElementById('pseudo').value;
           let bdy = document.getElementById('birthday').value
 
           try{
-            let reponse = await fetch(app.data.serverAddress+"/register", {
+            let response = await fetch(app.data.serverAddress + "/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 mail         : email,
-                password     : passWord,
+                password     : password,
                 surname      : lastName,
                 name         : firstName,
                 pseudo       : pseudoo,

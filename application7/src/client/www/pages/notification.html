@@ -12,18 +12,15 @@
 
   <!-- Scrollable page content-->
   <div class="page-content">
-    <div class="block-title">Demande d'ajout d'amis</div>
+    <div class="block-title">Demande d'ajout reçues</div>
       <div class="list links-list">
         <ul>
           {{#each myfriends}}
             <li>{{senderSurname}} {{senderName}} </li>
-            <li>Status of the invitation : {{status}}</li>
-            {{#js_if "this.status === 'pending'"}}
               <div class="block block-strong row">
                 <div class="col"><a class="button convert-form-to-data" href="#" @click="accepter('{{senderId}}','{{senderSurname}}','{{senderName}}','{{receiverSurname}}','{{receiverName}}')">Accepter l'invitation</a></div>
                 <div class="col"><a class="button convert-form-to-data" href="#" @click="refuser('{{senderId}}','{{senderSurname}}','{{senderName}}','{{receiverSurname}}','{{receiverName}}')">Refuser l'invitation</a></div>
               </div>
-            {{/js_if}}
           {{/each}}
         </ul>
       </div>
@@ -35,44 +32,23 @@ return{
   async data(){
     let myfriends = [];
     try {
-      myfriends = await fetch( app.data.serverAddress +"/friends")
+      myfriends = await app.methods.tokenHandlingFetch("/notif/" + app.data.user.id)
           .then(res => res.json())
     }
     catch(err) {
       app.dialog.alert("Error " + err);
     }
     finally{
-      let i = myfriends.length-1
-      //for (var i=0;i<myfriends.length;i++){
-      while(i>=0){
-        if(myfriends[i].status === 'accepted' && myfriends[i].senderId === app.data.user.id){
-          app.dialog.alert(myfriends[i].receiverSurname + ' ' + myfriends[i].receiverName + " a accepté votre demande d'ajouts")
-          enleve_friend = myfriends.splice(i,1);
-        }
-        else if(myfriends[i].status === 'refused' && myfriends[i].senderId === app.data.user.id){
-            app.dialog.alert(myfriends[i].receiverSurname + ' ' + myfriends[i].receiverName + " a refusé votre demande d'ajouts")
-            enleve_friend1 = myfriends.splice(i,1);
-        }
-        else if(myfriends[i].status === 'pending' && myfriends[i].senderId === app.data.user.id){
-            enleve_friend2 = myfriends.splice(i,1);
-        }
-        else if(myfriends[i].senderId !== app.data.user.id && myfriends[i].receiverId !== app.data.user.id){
-          enleve_friend3 = myfriends.splice(i,1);
-        }
-        i=i-1
-      }
+      return {myfriends : myfriends};
     }
-    return {myfriends : myfriends};
   },
   methods : {
     accepter: function(idexp,nomexp,prenomexp,nomdest,prenomdest){
-      for(var i=0 ; i < this.myfriends.length ; i++){
-        if(this.myfriends[i].senderId === idexp && this.myfriends[i].receiverId === app.data.user.id){
-          fetch( app.data.serverAddress +"/updateinvite", {
+        app.methods.tokenHandlingFetch(  "/updateinvite", {
               method: 'PUT',
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                senderId        : idexp, 
+                senderId        : idexp,
                 receiverId      : app.data.user.id,
                 senderSurname   : nomexp,
                 senderName      : prenomexp,
@@ -83,20 +59,12 @@ return{
           })
           .catch(err => app.dialog.alert('Error ' + err))
           .finally(() => {
-            app.dialog.alert(nomexp + ' ' + prenomexp + " est désormais dans votre liste d'amis.")
-            this.$router.navigate(
-              {
-                name:'friends',
-              }
-            );
+            app.dialog.alert(nomexp + ' ' + prenomexp + " is in your friends's list.")
+            this.$router.navigate('/friendlist');
           })
-        }
-      }
     },
     refuser: function(idexp,nomexp,prenomexp,nomdest,prenomdest){
-      for(var i=0;i<this.myfriends.length;i++){
-        if(this.myfriends[i].senderId === idexp && this.myfriends[i].receiverId === app.data.user.id){
-          fetch( app.data.serverAddress +"/updateinvite", {
+          app.methods.tokenHandlingFetch( "/updateinvite", {
               method: 'PUT',
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -111,15 +79,9 @@ return{
           })
           .catch(err => app.dialog.alert('Error ' + err))
           .finally(() => {
-            app.dialog.alert("Vous avez refusé la demande d'ajout envoyée par " + nomexp + ' ' + prenomexp)
-            this.$router.navigate(
-              {
-                name:'friends',
-              }
-            );
-          }) //finally
-        }
-      }
+            app.dialog.alert("You refused the friend's request received from " + nomexp + ' ' + prenomexp)
+            this.$router.navigate('/friendlist');
+          })
     },
     previouspage:function(){
       this.$router.navigate('/home');
