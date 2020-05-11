@@ -1,5 +1,13 @@
 var $$ = Dom7;
 
+const emptyUserInfo = {
+  name : "",
+  surname : "",
+  id : "",
+  pseudo : "",
+  birthday : ""
+}
+
 var app = new Framework7({
   root: '#app', // App root element
 
@@ -11,23 +19,52 @@ var app = new Framework7({
   data: function () {
     return {
         serverAddress: 'http://localhost:3000',
-        user: {
-          name : "",
-          surname : "",
-          id : "",
-          pseudo : "",
-          birthday : ""
-        }
+        user: { ... emptyUserInfo} //copy the fields of emptyUserInfo into user
     };
   },
   // App root methods
   methods: {
-/*     helloWorld: function () {
-      app.dialog.alert('Hello World!');
-    }, */
+    deleteUserData: function (){
+      app.data.user =  { ... emptyUserInfo};
+      delete localStorage.tokenExp;
+      delete localStorage.token;
+    },
+    checkToken: function(){
+      if (localStorage.tokenExp){
+        if (localStorage.tokenExp > Date.now()){
+          return true;
+        } else {
+          this.dialog.alert('Session has expired. <br> Please login ');
+        }
+      }
+      this.views.main.router.navigate('/');  
+      return false;
+    },
+    //The following function can seem a bit unorthodox as they might neither 
+    //reject or resolve because they'll simply redirect to login page
+    checkTokenOnRoute: function (routeTo, routeFrom, resolve, reject){
+      if( app.methods.checkToken() ){
+        resolve();
+      }
+    },
+    tokenHandlingFetch: async function(relativePath, data){
+      // this function does the same as fetch except it adds the token in the url and handle the invalid token error from the server
+      if (app.methods.checkToken()){
+        return  fetch( app.data.serverAddress + relativePath + "/?token=" + localStorage.token,data)
+                .catch(err => {
+                  if (err.message == "TokenExpiredError"){
+                    this.dialog.alert('Session has expired. <br> Please login ');
+                    this.$router.navigate('/')
+                  } else {
+                    throw err;
+                  }
+                })
+
+      } 
+    }
   },
-  // App routes
-  routes: routes,
+
+
 
 
   // Input settings
@@ -61,7 +98,11 @@ $$('#my-login-screen .login-button').on('click', function () {
   // Alert username and password
   app.dialog.alert('Username: ' + username + '<br>Password: ' + password);
 });
+  
+// App routes
+// we add route to app after, so that route is created when routes are loaded => routes can use app
+app.routes = routes;
 
 app.views.create('.view-main',{
-  url:'/',
-})
+  url:'/home',
+}) 

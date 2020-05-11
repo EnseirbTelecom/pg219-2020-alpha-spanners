@@ -60,6 +60,7 @@ return {
           app.dialog.alert(jsonRes.error);
         } else {
           localStorage.token = jsonRes.token;
+          localStorage.tokenExp = jsonRes.tokenExp;
           app.data.user = {
             name : jsonRes.name,
             surname : jsonRes.surname,

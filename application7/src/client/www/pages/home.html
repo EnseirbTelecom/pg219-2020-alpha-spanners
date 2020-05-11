@@ -43,7 +43,21 @@
                 </a>
               </li>
               <li>
-                <a href="#tab4" class="button" @click='notification'>notifications</a>
+                <a href="#tab4" class="button" @click='notification'>
+                  <i class="icon f7-icons if-not-md">bell</i>
+                  <i class="icon material-icons if-md">notifications</i>
+                  notifications
+                </a>
+              </li>
+              <li>
+                <a href="#tab5" class="button panel-close"  @click='disconnect'>
+                  <i class="icon f7-icons if-not-md">xmark_circle_fill</i>
+                  <i class="icon material-icons if-md">cancel</i>
+                  Disconnect
+                  <div class="item-inner">
+                    <span class="tabbar-label">Disconnect</span>
+                   </div>
+                </a>
               </li>
              </ul>
             </div>
@@ -80,7 +94,11 @@ return {
     },
     notification: function(){
         this.$router.navigate('/notif');
-      }
+      },
+    disconnect: function(){
+      app.dialog.confirm("Are you sure ?", "Logout", () => this.$router.navigate('/'))
+      
+    },
   }
 }
 </script>

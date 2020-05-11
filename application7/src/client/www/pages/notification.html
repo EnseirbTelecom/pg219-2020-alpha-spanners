@@ -35,7 +35,7 @@ return{
   async data(){
     let myfriends = [];
     try {
-      myfriends = await fetch( app.data.serverAddress +"/friends")
+      myfriends = await app.methods.tokenHandlingFetch("/friends")
           .then(res => res.json())
     }
     catch(err) {
@@ -68,7 +68,7 @@ return{
     accepter: function(idexp,nomexp,prenomexp,nomdest,prenomdest){
       for(var i=0 ; i < this.myfriends.length ; i++){
         if(this.myfriends[i].senderId === idexp && this.myfriends[i].receiverId === app.data.user.id){
-          fetch( app.data.serverAddress +"/updateinvite", {
+          app.methods.tokenHandlingFetch( "/updateinvite", {
               method: 'PUT',
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -96,7 +96,7 @@ return{
     refuser: function(idexp,nomexp,prenomexp,nomdest,prenomdest){
       for(var i=0;i<this.myfriends.length;i++){
         if(this.myfriends[i].senderId === idexp && this.myfriends[i].receiverId === app.data.user.id){
-          fetch( app.data.serverAddress +"/updateinvite", {
+          app.methods.tokenHandlingFetch( "/updateinvite", {
               method: 'PUT',
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
