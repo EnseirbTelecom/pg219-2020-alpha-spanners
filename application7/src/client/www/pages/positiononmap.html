@@ -1,0 +1,41 @@
+<template>
+  <div class="page" data-name="positiononmap">
+    
+
+    <div class="page-content">
+        <div class="block">
+      <div id='positionmap' style="height:100%;width:100%;"></div>
+    </div>
+    </div>
+
+  </div>
+
+</template>
+<script>
+return {
+      on: {
+        pageInit: function(e, page) {
+          let response = fetch(app.data.serverAddress + "/pastposition/" + this.$route.params.idposition)
+                            .then(res => res.json())
+                            .then(function(res){
+                                    var map = new google.maps.Map(document.getElementById('positionmap'), {
+                                      zoom: 8,
+                                      center: {lat: parseInt(res[0].latitude), lng: parseInt(res[0].longitude)}
+                                    });
+
+                                    var myLatLng = { lat: parseInt(res[0].latitude), lng: parseInt(res[0].longitude) };
+                                    var marker = new google.maps.Marker(
+                                        {
+                                          position: myLatLng,
+                                          map: map,
+                                        });
+
+                            })
+        }
+       
+     
+   }
+    }
+
+
+</script>

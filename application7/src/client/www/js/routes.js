@@ -5,9 +5,11 @@ var routes = [
     componentUrl: './pages/page1.html',
   },
   {
-    name:'mapage',
-    path:'/home/:obj/:monid/:monnom/:monprenom',
-    componentUrl: './pages/initialpage.html',
+    name:'home',
+    path:'/home',
+    componentUrl: './pages/home.html',
+       beforeEnter: (a,b,c,d) => {app.methods.checkTokenOnRoute(a,b,c,d)},
+    
   },
   {
     path: '/formulaire',
@@ -34,6 +36,8 @@ var routes = [
     path:'/notif/:tokeen/:myid/:monnomm/:monprenomm',
     componentUrl:'./pages/notification.html'
   },
+ 
+       
 
   // {
   //   path: '/about/',

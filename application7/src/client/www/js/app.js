@@ -6,6 +6,9 @@ var app = new Framework7({
   id: 'io.framework7.myapp', // App bundle ID
   name: 'FriendFinder', // App name
   theme: 'auto', // Automatic theme detection
+  popover: {
+    closeByBackdropClick: false,
+  },
 
   // App root data
   data: function () {
@@ -59,6 +62,61 @@ $$('#my-login-screen .login-button').on('click', function () {
   app.dialog.alert('Username: ' + username + '<br>Password: ' + password);
 });
 
-app.views.create('.view-main',{
-  url:'/',
+// App routes
+// we add route to app after, so that route is created when routes are loaded => routes can use app
+app.routes = routes;
+
+// if there is user data is save in JSON in localStorage we retrive it
+if (localStorage.userJson){
+  app.data.user = JSON.parse(localStorage.userJson)
+}
+
+$$(document).on('page:init', '.page[data-name="testmap"]', function (e) {
+  let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id)
+                    .then(res => res.json())
+                    .then(function(res){
+                              alert(res.latitude + ' ' + res.longitude);
+                              var map = new google.maps.Map(document.getElementById('map'), {
+                                zoom: 8,
+                                center: {lat: parseInt(res.latitude), lng: parseInt(res.longitude)}
+                              });
+
+
+                              var myLatLng = { lat: parseInt(res.latitude), lng: parseInt(res.longitude) };
+                              var marker = new google.maps.Marker(
+                                  {
+                                    position: myLatLng,
+                                    map: map,
+                                  });
+                    })
+
+});
+
+$$(document).on('page:init', '.page[data-name="formPosition"]', function (e) {
+  window.navigator.geolocation.getCurrentPosition(function(position) {
+        var inputLatitude = document.getElementById('latitude')
+        var inputLongitude = document.getElementById('longitude')
+        inputLatitude.value = position.coords.latitude
+        inputLongitude.value = position.coords.longitude
+        
+  },function(error){
+       alert("Error in localisation N° " + error.code + " : " + error.message);
+   });
+});
+
+$$(document).on('page:init', '.page[data-name="home"]', function (e) {
+  fetch(app.data.serverAddress +"/positions", {
+            method: "DELETE",
+          })
+          .catch(err => {app.dialog.alert('Error ' + err); throw err;})
 })
+
+
+app.views.create('.view-main',{
+  url:'/home',
+}) ;
+
+
+
+
+

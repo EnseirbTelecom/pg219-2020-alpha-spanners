@@ -1,0 +1,74 @@
+<template>
+<div class="page" data-name="addfriends">
+  <div class="appbar">
+    <div class="left">
+      <a href="#" class="button" @click ='previouspage'>
+        <i class="icon icon-back"></i>
+        Friends
+        <span class="if-not-md">Back</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Scrollable page content-->
+  <div class="page-content">
+
+    <div class="block-title">List of users (resp members ?)</div>
+      <div class="list links-list">
+        <ul>
+          {{#each users}}
+            <a href="#"><li>{{mail}} {{surname}} {{name}}</li></a>
+            <div class="block block-strong row">
+              <div class="col"><a class="button convert-form-to-data" href ='#' @click="add('{{surname}}','{{name}}','{{_id}}')" >Add {{name}}</a></div>
+            </div>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+return {
+    async data() {
+      let users = [];
+      try {
+        users = await app.methods.tokenHandlingFetch( "/friends/addFriends/" + app.data.user.id)
+            .then(res => res.json())
+      }
+      catch(err) {
+        app.dialog.alert("Error " + err);
+      }
+      finally{
+         return {users:users};
+      }
+    },
+    methods : {
+      add: function(nom,prenom,id) {
+        app.methods.tokenHandlingFetch( "/invite", {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                senderId        : app.data.user.id,
+                senderSurname   : app.data.user.surname,
+                senderName      : app.data.user.name,
+                receiverSurname : nom,
+                receiverName    : prenom,
+                receiverId      : id
+              })
+          })
+          .catch(err => app.dialog.alert('Error ' + err))
+          .finally(() => {
+            app.dialog.alert('Friend request sent to ' + nom + ' ' + prenom)
+            this.$router.navigate('/home');
+          })
+      },
+      previouspage: function(){
+        this.$router.navigate(
+          {
+            name:'friends',
+          }
+        );
+      }
+    }
+}
+</script>

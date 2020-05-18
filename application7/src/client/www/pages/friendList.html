@@ -1,0 +1,133 @@
+<template>
+
+      <div class="page" data-name="friendlist" >
+        <!-- FAB Backdrop -->
+       <div class="fab-backdrop"></div>
+
+        <!-- FAB Right Bottom -->
+        <div class="fab fab-right-bottom color-yellow">
+          <a href="#">
+            <!-- Icons For iOS Theme -->
+            <i class="icon f7-icons if-not-md">add</i>
+            <i class="icon f7-icons if-not-md">close</i>
+            <!-- Icons For MD Theme -->
+            <i class="icon material-icons md-only">add</i>
+            <i class="icon material-icons md-only">close</i>
+          </a>
+          <!-- FAB speed dial actions -->
+          <div class="fab-buttons fab-buttons-top">
+            <a href="#tab-2" class="fab-label-button" @click = 'addFriend'>
+              <i class="icon f7-icons if-not-md">person_badge_plus_fill</i>
+              <i class="icon material-icons md-only">person_add</i>
+              <span class="fab-label">Add friend</span>
+            </a>
+            <a href="#tab-3" class="fab-label-button" @click='sentRequest'>
+              <i class="icon f7-icons if-not-md">paperplane_fill</i>
+              <i class="icon material-icons md-only">send</i>
+              <span class="fab-label">Sent request</span>
+            </a>
+            </div>
+        </div>
+      
+      <div class="appbar">
+        <div class="appbar-inner">
+          <div class="left">
+            <a href="#" class="link icon-only panel-open" data-panel="left">
+              <i class="icon f7-icons if-not-md">menu</i>
+              <i class="icon material-icons if-md">menu</i>
+            </a>
+          </div>
+          
+          
+          </div>
+        </div>
+      
+     
+      <div class="page-content">
+        
+       <div class="block-title">List of friends</div>
+        <div class="list">
+          <ul>
+            {{#each friends}}
+            {{#js_if "this.senderId ===  app.data.user.id"}}
+              <a href="#"><li>{{receiverSurname}} {{receiverName}} </li></a>
+              <div class="block block-strong row">
+                <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">Delete {{receiverSurname}}</a></div>
+              </div>
+            {{else}}
+              {{#js_if "this.receiverId === app.data.user.id"}}
+              <a href="#"><li>{{senderSurname}} {{senderName}} </li></a>
+              <div class="block block-strong row">
+                <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">Delete {{senderSurname}}</a></div>
+              </div>
+              {{/js_if}}
+            {{/js_if}}
+            {{/each}
+          </ul>
+      
+        </div>
+        
+      </div>
+    </div>
+
+
+   </div>
+ 
+</div>
+
+</template>
+<script>
+
+return {
+  async data() {
+    let friends = [];
+   
+    try {
+      friends = await app.methods.tokenHandlingFetch("/friendlist/" + app.data.user.id)
+        .then(res => res.json())
+    
+    }catch(err) {
+      app.dialog.alert("Error " + err);
+    }
+    finally{
+      return { friends: friends };
+    }
+   
+  },
+  methods: {
+    delete : function(idexp,iddest,status){
+      app.methods.tokenHandlingFetch( "/removefriend/" + idexp + '/' + iddest , {
+          method: "DELETE",
+      })
+      .catch(err => app.dialog.alert('Error ' + err))
+      .finally(() => {
+          this.$router.navigate('/home');
+      });
+    },
+
+      delete : function(idexp,iddest,status){
+      fetch( app.data.serverAddress + "/removefriend/" + idexp + '/' + iddest , {
+          method: "DELETE",
+      })
+      .catch(err => app.dialog.alert('Error ' + err))
+      .finally(() => {
+        app.dialog.alert('Canceled invitation !')
+        this.$router.navigate('/home');
+      });
+    },
+    addFriend : function(){
+      this.$router.navigate('/addfriends');
+    },
+    monprofil : function(){
+      this.$router.navigate('/home');
+    },
+    sentRequest:function(){
+      this.$router.navigate('/sentRequest')
+    },
+    openPopover:function(){
+      dynamicPopover.open();
+    }
+    
+  }
+}
+</script>
