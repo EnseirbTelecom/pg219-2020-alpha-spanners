@@ -66,7 +66,7 @@ return {
             name : jsonRes.name,
             surname : jsonRes.surname,
             id : jsonRes.id,
-            pseudo : "",
+            pseudo : jsonRes.pseudo,
             birthday : "",
           }
           localStorage.userJson = JSON.stringify(app.data.user)
@@ -76,11 +76,11 @@ return {
     //},
       login: async function() {
         // encrypted password : partie client
-        let mail = document.getElementById('mail1').value;
-        let password = CryptoJS.AES.encrypt(document.getElementById('password1').value,'secret key 123').toString();
+        const mail = document.getElementById('mail1').value;
+        const password = CryptoJS.AES.encrypt(document.getElementById('password1').value,'secret key 123').toString();
         //let password=CryptoJS.AES.encrypt(document.getElementById('password').value,'secret key 123').toString();
         try{
-          let reponse = await fetch( app.data.serverAddress +"/login", {
+          const reponse = await fetch( app.data.serverAddress +"/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

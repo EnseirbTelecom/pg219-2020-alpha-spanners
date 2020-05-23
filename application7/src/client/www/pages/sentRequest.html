@@ -19,7 +19,7 @@
       <li class="swipeout">
         <div class="item-content swipeout-content">
           <div class="item-inner">
-            <div class="item-title">{{receiverSurname}} accepted your invitation</div>
+            <div class="item-title">{{pseudo}} accepted your invitation</div>
           </div>
         </div>
         <div class="swipeout-actions-left">
@@ -30,7 +30,7 @@
           <li class="swipeout">
             <div class="item-content swipeout-content">
               <div class="item-inner">
-                <div class="item-title">{{receiverSurname}} refused your invitation</div>
+                <div class="item-title">{{pseudo}} refused your invitation</div>
               </div>
             </div>
             <div class="swipeout-actions-left">
@@ -48,9 +48,9 @@
     <ul>
       {{#each friends}}
        {{#js_if "this.status ===  'pending'"}}
-        <a href="#"><li> {{receiverSurname}}</li></a>
+        <a href="#"><li> {{pseudo}}</li></a>
           <div class="block block-strong row">
-            <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')"> Cancel invitation </a></div>
+            <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{id}}')"> Cancel invitation </a></div>
           </div>
         {{/js_if}}
       {{/each}}
@@ -63,9 +63,9 @@
 <script>
 return{
   async data() {
-    let friends = [];
+    var friends = [];
     try {
-      friends = await fetch( app.data.serverAddress +"/sentRequest/" + app.data.user.id)
+      friends = await app.methods.tokenHandlingFetch( "/friends/sent/all")
         .then(res => res.json())
     }catch(err) {
       app.dialog.alert("Error " + err);
@@ -73,10 +73,11 @@ return{
     finally{
       return { friends: friends };
     }
+
   },
   methods: {
-    delete : function(idexp,iddest,status){
-      fetch( app.data.serverAddress + "/removefriend/" + idexp + '/' + iddest , {
+    delete : function(id){
+      app.methods.tokenHandlingFetch( "/friend/delete/" + id , {
           method: "DELETE",
       })
       .catch(err => app.dialog.alert('Error ' + err))

@@ -36,9 +36,8 @@
 
 return {
   async data (){
-    let pastpositions = [];
       try {
-        pastpositions = await fetch(app.data.serverAddress + "/pastpositions/" + app.data.user.id)
+        const pastpositions = await app.methods.tokenHandlingFetch("/pos/past" )
           .then(res => res.json());
       } catch(err) {
         this.$app.dialog.alert("Error " + err);
@@ -50,12 +49,13 @@ return {
       this.$router.navigate('/home');
     },
     delete : function(idposition){
-        fetch( app.data.serverAddress +"/deletedposition/"  + idposition , {
-            method: "DELETE",
+      app.methods.tokenHandlingFetch( "/pos/delete/"  + idposition , { method: "DELETE",})
+        .then(resp => {
+          app.dialog.alert('This position has been deleted')
+          this.$router.navigate('/pastpositions');
         })
         .catch(err => app.dialog.alert('Error ' + err))
-        app.dialog.alert('This position has been deleted')
-        this.$router.navigate('/home');
+
     },
     positionOnmap : function(id){
       this.$router.navigate(

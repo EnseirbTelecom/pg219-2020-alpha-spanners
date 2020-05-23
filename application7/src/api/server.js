@@ -27,19 +27,4 @@ MongoClient.connect(url)
      .then(mydatabase => routes.implement(app,mydatabase))
   .catch(err => { throw err })
 
-  // MongoClient.connect(url)
-  //   .then(database => database.db("users").collection("friends"))
-  //   .then(friends => {
-  //     app.post('/friend', (req,res) => {
-  //
-  //       const nvAmitie ={
-  //         expediteur : req.body.myToken,
-  //         destinataire:req.body.friendId,
-  //         status:'pending'
-  //       }
-  //       friends.insertOne(nvAmitie)
-  //           .then(resultat => res.status(201).json(nvAmitie))
-  //     })
-  //   })
-
   app.listen(3000,() => console.log("Awaiting requests."))

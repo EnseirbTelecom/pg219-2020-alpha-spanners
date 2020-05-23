@@ -2,9 +2,9 @@
 <div class="page" data-name="home">
   <div class="appbar">
     <div class="left">
-      <a href="#" class="button" @click ='nextppage'>
+      <a href="#" class="button" @click ='nextpage'>
         <i class="icon icon-back"></i>
-        Friends
+        Add Friends
         <span class="if-not-md">Back</span>
       </a>
     </div>
@@ -13,59 +13,80 @@
   <!-- Scrollable page content-->
   <div class="page-content">
 
-    <div class="block-title">List of users (resp members ?)</div>
-      <div class="list links-list">
-        <ul>
-          {{#each users}}
-            <a href="#"><li>{{mail}} {{surname}} {{name}}</li></a>
-            <div class="block block-strong row">
-              <div class="col"><a class="button convert-form-to-data" href ='#' @click="add('{{surname}}','{{name}}','{{_id}}')" >Add {{name}}</a></div>
+    <div class="block-title">
+    <div class="item-content item-input">
+      <div class="item-inner">
+          <div class="item-title item-label">Find a user</div>
+          <div class="item-input-wrap">
+            <input type="text" placeholder="mail or pseudo" id="search" @input="search" >
+            <span class="input-clear-button"></span>
+            
+          </div>
+          <a class="button convert-form-to-data" href ='#' @click="search">search</a>
+          <div class="item-title item-label">User found :</div>
+            <div class="block row " >
+              <div id="userFoundPseudo" class="col"></div>
+              <div class="col"><a class="button" href ='#' @click="add" id="userFoundButton"></a></div>
             </div>
-          {{/each}}
-        </ul>
+
+
       </div>
+    </div>
+    </div>
     </div>
   </div>
 </template>
 <script>
 return {
-    async data() {
-      let users = [];
-      try {
-        users = await app.methods.tokenHandlingFetch( "/friends/addFriends/" + app.data.user.id)
-            .then(res => res.json())
-      }
-      catch(err) {
-        app.dialog.alert("Error " + err);
-      }
-      finally{
-         return {users:users};
-      }
-    },
+
     methods : {
-      add: function(nom,prenom,id) {
-        app.methods.tokenHandlingFetch( "/invite", {
-              method: 'POST',
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                senderId        : app.data.user.id,
-                senderSurname   : app.data.user.surname,
-                senderName      : app.data.user.name,
-                receiverSurname : nom,
-                receiverName    : prenom,
-                receiverId      : id
-              })
+      add: function() {
+        const id = $$('#userFoundButton').data('id');
+
+        app.methods.tokenHandlingFetch( "/friend/invite/"+id , {method: "PUT"})
+          .then(res => {
+            switch (res.status){
+              case 201:
+                app.dialog.alert('Friend request sent to ' + $$('#userFoundPseudo').text());
+                this.$router.navigate('/home');
+              break;
+              case 208:
+                app.dialog.alert('You have already sent a friend request to ' + $$('#userFoundPseudo').text());
+              break;
+              case 200:
+                app.dialog.alert($$('#userFoundPseudo').text()+ " had already sent you a friend request, you two are now friends !");
+                this.$router.navigate('/home');
+              break;
+              case 404:
+                app.dialog.alert($$('#userFoundPseudo').text()+ " that's you ! You don't need us to localise yourself");
+                this.$router.navigate('/home');
+              break;
+              default:
+                app.dialog.alert("server side error");
+                console.log(res);
+            }
+
           })
           .catch(err => app.dialog.alert('Error ' + err))
-          .finally(() => {
-            app.dialog.alert('Friend request sent to ' + nom + ' ' + prenom)
-            this.$router.navigate('/home');
+      },
+      search: function(){
+        const query = document.getElementById("search").value;
+        app.methods.tokenHandlingFetch( "/search/"+query)
+          .then(res => res.json())
+          .then(json =>{
+            if( json){
+              $$('#userFoundPseudo').text(json.pseudo);
+              var userFoundButton = $$('#userFoundButton')
+              userFoundButton.text("add");
+              userFoundButton.data('id',json._id)
+            }
+
           })
       },
-      nextppage: function(){
+      nextpage: function(){
         this.$router.navigate(
           {
-            name:'friends',
+            name:'home',
           }
         );
       }

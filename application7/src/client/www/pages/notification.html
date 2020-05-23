@@ -16,10 +16,10 @@
       <div class="list links-list">
         <ul>
           {{#each myfriends}}
-            <li>{{senderSurname}} {{senderName}} </li>
+            <li>{{pseudo}}  </li>
               <div class="block block-strong row">
-                <div class="col"><a class="button convert-form-to-data" href="#" @click="accepter('{{senderId}}','{{senderSurname}}','{{senderName}}','{{receiverSurname}}','{{receiverName}}')">Accepter l'invitation</a></div>
-                <div class="col"><a class="button convert-form-to-data" href="#" @click="refuser('{{senderId}}','{{senderSurname}}','{{senderName}}','{{receiverSurname}}','{{receiverName}}')">Refuser l'invitation</a></div>
+                <div class="col"><a class="button convert-form-to-data" href="#" @click="accepter('{{id}}','{{pseudo}}')">Accepter l'invitation</a></div>
+                <div class="col"><a class="button convert-form-to-data" href="#" @click="refuser('{{id}}','{{pseudo}}')">Refuser l'invitation</a></div>
               </div>
           {{/each}}
         </ul>
@@ -30,9 +30,9 @@
 <script>
 return{
   async data(){
-    let myfriends = [];
+    var myfriends = [];
     try {
-      myfriends = await app.methods.tokenHandlingFetch("/notif/" + app.data.user.id)
+      myfriends = await app.methods.tokenHandlingFetch("/friends/received/pending")
           .then(res => res.json())
     }
     catch(err) {
@@ -43,45 +43,22 @@ return{
     }
   },
   methods : {
-    accepter: function(idexp,nomexp,prenomexp,nomdest,prenomdest){
-        app.methods.tokenHandlingFetch(  "/updateinvite", {
-              method: 'PUT',
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                senderId        : idexp,
-                receiverId      : app.data.user.id,
-                senderSurname   : nomexp,
-                senderName      : prenomexp,
-                receiverSurname : nomdest,
-                receiverName    : prenomdest,
-                status          : 'accepted',
-              })
-          })
-          .catch(err => app.dialog.alert('Error ' + err))
-          .finally(() => {
-            app.dialog.alert(nomexp + ' ' + prenomexp + " is in your friends's list.")
+    accepter: function(id, pseudo){
+        app.methods.tokenHandlingFetch(  "/friend/accept/"+id, {method: 'PUT'})
+          .then(() => {
+            app.dialog.alert(pseudo+ " is now in your friend list.")
             this.$router.navigate('/friendlist');
           })
+          .catch(err => app.dialog.alert('Error ' + err))
     },
-    refuser: function(idexp,nomexp,prenomexp,nomdest,prenomdest){
-          app.methods.tokenHandlingFetch( "/updateinvite", {
-              method: 'PUT',
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                senderId        : idexp,
-                receiverId      : app.data.user.id,
-                senderSurname   : nomexp,
-                senderName      : prenomexp,
-                receiverSurname : nomdest,
-                receiverName    : prenomdest,
-                status          : 'refused',
-              })
-          })
-          .catch(err => app.dialog.alert('Error ' + err))
-          .finally(() => {
-            app.dialog.alert("You refused the friend's request received from " + nomexp + ' ' + prenomexp)
+    refuser: function(id, pseudo){
+          app.methods.tokenHandlingFetch( "/friend/refuse/"+id, { method: 'PUT'})
+          .then(() => {
+            app.dialog.alert("You refused the friend's request of " +  pseudo)
             this.$router.navigate('/friendlist');
           })
+          .catch(err => app.dialog.alert('Error ' + err))
+
     },
     previouspage:function(){
       this.$router.navigate('/home');

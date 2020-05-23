@@ -86,15 +86,15 @@
 return {
   methods:{
     submit: async function() {
-          let email = document.getElementById('mail').value;
-          let password = CryptoJS.AES.encrypt(document.getElementById('password').value,'secret key 123').toString();
-          let lastName = document.getElementById('nom').value;
-          let firstName = document.getElementById('prenom').value;
-          let pseudoo = document.getElementById('pseudo').value;
-          let bdy = document.getElementById('birthday').value
+          const email = document.getElementById('mail').value;
+          const password = CryptoJS.AES.encrypt(document.getElementById('password').value,'secret key 123').toString();
+          const lastName = document.getElementById('nom').value;
+          const firstName = document.getElementById('prenom').value;
+          const pseudo = document.getElementById('pseudo').value;
+          const bdy = document.getElementById('birthday').value
 
           try{
-            let response = await fetch(app.data.serverAddress + "/register", {
+            await fetch(app.data.serverAddress + "/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -102,7 +102,7 @@ return {
                 password     : password,
                 surname      : lastName,
                 name         : firstName,
-                pseudo       : pseudoo,
+                pseudo       : pseudo,
                 birthday     : bdy,
               })
             })
