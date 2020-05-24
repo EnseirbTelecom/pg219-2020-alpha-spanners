@@ -128,7 +128,8 @@ return {
       app.methods.tokenHandlingFetch( "/pos/current")
         .then(res => res.json())
         .then(res => {
-          if (res && res.status == 200){
+          console.log(res)
+          if (res && res.longitude && res.latitude ){
             this.$app.dialog.alert(res.latitude + ' ' + res.longitude)
           } else {
             this.$app.dialog.alert("You must activate you localisation first !")
@@ -139,7 +140,7 @@ return {
       app.methods.tokenHandlingFetch("/pos/current" )
         .then(res => res.json())
         .then(res => {
-          if (res && res.status == 200){
+          if (res && res.longitude && res.latitude ){
             this.$router.navigate({
               name : 'map',
               params : {latitude : res.latitude, longitude: res.longitude}
