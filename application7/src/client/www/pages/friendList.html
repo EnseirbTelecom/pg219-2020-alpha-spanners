@@ -1,37 +1,27 @@
 <template>
 <div class="page" data-name="home">
   <div class="appbar">
-    <div class="appbar-inner">
-      <div class="left">
-        <a href="#" class="link icon-only panel-open" data-panel="left">
-          <i class="icon f7-icons if-not-md">menu</i>
-          <i class="icon material-icons if-md">menu</i>
-        </a>
-      </div>
+    <div class="left">
+      <a class="button" href="/home">
+        <i class="icon icon-back"></i>
+        Friends
+        <span class="if-not-md">Back</span>
+      </a>
     </div>
   </div>
 
   <!-- Scrollable page content-->
    <div class="page-content">
 
-    <div class="block-title">Liste des amis</div>
+    <div class="block-title">Friend list</div>
       <div class="list links-list">
         <ul>
           {{#each friends}}
-          {{#js_if "this.senderId ===  app.data.user.id"}}
-            <a href="#"><li>{{receiverSurname}} {{receiverName}} </li></a>
+            <li>{{pseudo}}</li>
             <div class="block block-strong row">
-              <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">Delete {{receiverSurname}}</a></div>
+              <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{id}}')">Delete {{pseudo}}</a></div>
             </div>
-          {{else}}
-            {{#js_if "this.receiverId === app.data.user.id"}}
-            <a href="#"><li>{{senderSurname}} {{senderName}} </li></a>
-            <div class="block block-strong row">
-              <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">Delete {{senderSurname}}</a></div>
-            </div>
-            {{/js_if}}
-          {{/js_if}}
-          {{/each}
+          {{/each}}
         </ul>
       </div>
     </div>
@@ -42,9 +32,9 @@
 <script>
 return {
   async data() {
-    let friends = [];
+    var friends = [];
     try {
-      friends = await app.methods.tokenHandlingFetch( app.data.serverAddress +"/friendlist/" + app.data.user.id)
+      friends = await app.methods.tokenHandlingFetch("/friends/list" )
         .then(res => res.json())
     }catch(err) {
       app.dialog.alert("Error " + err);
@@ -54,8 +44,8 @@ return {
     }
   },
   methods: {
-    delete : function(idexp,iddest,status){
-      app.methods.tokenHandlingFetch( "/removefriend/" + idexp + '/' + iddest , {
+    delete : function(id){
+      app.methods.tokenHandlingFetch( "/friend/delete/"  + id , {
           method: "DELETE",
       })
       .catch(err => app.dialog.alert('Error ' + err))

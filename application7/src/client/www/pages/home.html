@@ -99,9 +99,9 @@
     <div class="list links-list">
       <ul>
         {{#each friendsposition}}
-        <a href="#"><li>{{userName}} se trouve à la latitude {{latitude}} et à la longitude {{longitude}}</li></a>
+        <a href="#"><li>{{pseudo}} is currently at ({{latitude}} {{longitude}})</li></a>
         <div class="block block-strong row">
-          <div class="col"><a class="button convert-form-to-data" href ='#' @click="visualizeOnmap('{{userId}}')">Visualiser sur une carte</a></div>
+          <div class="col"><a class="button convert-form-to-data" href ='#' @click="visualizeOnmap('{{latitude}}', '{{longitude}}')">see on a map</a></div>
         </div>
         {{/each}}
       </ul>
@@ -114,9 +114,9 @@
 return {
   methods : {
     async data (){
-      let friendsposition = [];
+      var friendsposition = [];
       try {
-        friendsposition = await fetch(app.data.serverAddress + "/friendsposition/" + app.data.user.id)
+        friendsposition = await app.methods.tokenHandlingFetch("/pos/friends")
           .then(res => res.json());
       } catch(err) {
         this.$app.dialog.alert("Error " + err);
@@ -125,14 +125,29 @@ return {
       return { friendsposition: friendsposition };
     },
     obtainPosition : function() {
-      let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id)
-                        .then(res => res.json())
-                        .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$app.dialog.alert(res.latitude + ' ' + res.longitude))
+      app.methods.tokenHandlingFetch( "/pos/current")
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.status == 200){
+            this.$app.dialog.alert(res.latitude + ' ' + res.longitude)
+          } else {
+            this.$app.dialog.alert("You must activate you localisation first !")
+          }
+        })
     },
     positionInMap : function() {
-      let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id)
-                        .then(res => res.json())
-                        .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate('/map'))
+      app.methods.tokenHandlingFetch("/pos/current" )
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.status == 200){
+            this.$router.navigate({
+              name : 'map',
+              params : {latitude : res.latitude, longitude: res.longitude}
+            })
+          } else {
+            this.$app.dialog.alert("You must activate you localisation first !")
+          }
+        })
     },
     activatePosition : function(){
       this.$router.navigate('/formPosition')
@@ -159,10 +174,10 @@ return {
     pastposition : function(){
       this.$router.navigate('/pastpositions')
     },
-    visualizeOnmap : function(idfriend){
+    visualizeOnmap : function(lat, long){
       this.$router.navigate({
-        name : 'friendmap',
-        params : {idfriend : idfriend}
+        name : 'map',
+        params : {latitude : lat, longitude: long}
       })
     }
         
