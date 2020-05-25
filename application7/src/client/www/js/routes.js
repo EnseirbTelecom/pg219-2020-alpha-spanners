@@ -56,7 +56,7 @@ var routes = [
   {
     name:'pastpositions',
     path:'/pastpositions',
-    componentUrl:'./pages/pastposition.html'
+    componentUrl:'./pages/pastposition.html',
   },
   {
     name:'map',
