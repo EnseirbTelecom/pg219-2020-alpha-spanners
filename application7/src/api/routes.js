@@ -240,6 +240,7 @@ function implement(app,database){
       .then(received => res.json(received))
       .catch(err => {res.sendStatus(500); throw err})
   })
+
   //gets the friend list
   app.get('/friends/list/', verifyToken, (req,res) => {
     const userObjectId = ObjectID(req.userId);

@@ -1,29 +1,72 @@
 <template>
 <div class="page" data-name="home">
-  <div class="appbar">
-    <div class="left">
-      <a href="#" class="button" @click ='previouspage'>
-        <i class="icon icon-back"></i>
-        Home
-        <span class="if-not-md">Back</span>
-      </a>
-    </div>
+  <div class="navbar">
+    <div class="navbar-bg"></div>
+          <div class="navbar-inner">
+            <div class="left">
+              <a href="#" class="button" @click ='previouspage'>
+                <i class="icon icon-back"></i>
+               
+                <span class="if-not-md">Back</span>
+              </a>
+            </div>
+            <div class="title"> Friend requests </div>
+          </div>
   </div>
 
   <!-- Scrollable page content-->
   <div class="page-content">
-    <div class="block-title">Demande d'ajout reçues</div>
-      <div class="list links-list">
-        <ul>
-          {{#each myfriends}}
-            <li>{{pseudo}}  </li>
-              <div class="block block-strong row">
-                <div class="col"><a class="button convert-form-to-data" href="#" @click="accepter('{{id}}','{{pseudo}}')">Accepter l'invitation</a></div>
-                <div class="col"><a class="button convert-form-to-data" href="#" @click="refuser('{{id}}','{{pseudo}}')">Refuser l'invitation</a></div>
+    <div class="list ">
+      <ul>
+        {{#each myfriends}}
+          <li>
+            <div class="row">
+            <h3>{{pseudo}}</h3>
+             <div class="wrapper-button">
+                  <div class="row">
+                    <a class="button convert-form-to-data" @click="accepter('{{id}}','{{pseudo}}')">
+                      <i class="icon material-icons if-md">check</i>
+                      Accept</a>
+                    <a class="button convert-form-to-data" href="#"  @click="refuser('{{id}}','{{pseudo}}')">
+                      <i class="icon material-icons if-md">clear</i>
+                      Delete</a>
+                </div>
+            </div>
+          </div>
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+    <div class="list ">
+      <ul>
+        {{#each acceptedReq}}
+        {{#js_if "this.status ===  'accepted'"}}
+        <li class="swipeout">
+          <div class="item-content swipeout-content">
+            <div class="item-inner">
+              <div class="item-title">{{pseudo}} accepted your invitation</div>
+            </div>
+          </div>
+          <div class="swipeout-actions-left">
+            <a href="#" class="swipeout-delete">Delete</a>
+          </div>
+          {{else}}
+            {{#js_if "this.status ===  'refused'"}}
+            <li class="swipeout">
+              <div class="item-content swipeout-content">
+                <div class="item-inner">
+                  <div class="item-title">{{pseudo}} refused your invitation</div>
+                </div>
               </div>
-          {{/each}}
-        </ul>
-      </div>
+              <div class="swipeout-actions-left">
+                <a href="#" class="swipeout-delete">Delete</a>
+              </div>
+            </li>
+            {{/js_if}}
+           {{/js_if}}
+        {{/each}}
+      </ul>
+    </div>
     </div>
   </div>
 </template>
@@ -31,16 +74,23 @@
 return{
   async data(){
     var myfriends = [];
+    var acceptedReq = [];
     try {
       myfriends = await app.methods.tokenHandlingFetch("/friends/received/pending")
-          .then(res => res.json())
+          .then(res => res.json()),
+      acceptedReq = await app.methods.tokenHandlingFetch( "/friends/sent/all")
+        .then(res => res.json())
+     
     }
     catch(err) {
       app.dialog.alert("Error " + err);
     }
     finally{
-      return {myfriends : myfriends};
+      console.log('num is'+ Object.keys(myfriends).length);
+      return {myfriends : myfriends, acceptedReq: acceptedReq};
     }
+
+   
   },
   methods : {
     accepter: function(id, pseudo){
@@ -62,7 +112,8 @@ return{
     },
     previouspage:function(){
       this.$router.navigate('/home');
-    }
+    },
+
   }
 }
 </script>

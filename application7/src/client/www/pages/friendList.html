@@ -1,29 +1,88 @@
 <template>
 <div class="page" data-name="home">
-  <div class="appbar">
-    <div class="left">
-      <a class="button" href="/home">
-        <i class="icon icon-back"></i>
-        Friends
-        <span class="if-not-md">Back</span>
+  <!-- FAB Backdrop -->
+  <div class="fab-backdrop"></div>
+
+  <!-- FAB Right Bottom -->
+  <div class="fab fab-right-bottom color-yellow">
+    <a href="#">
+      <!-- Icons For iOS Theme -->
+      <i class="icon f7-icons if-not-md">add</i>
+      <i class="icon f7-icons if-not-md">close</i>
+      <!-- Icons For MD Theme -->
+      <i class="icon material-icons md-only">add</i>
+      <i class="icon material-icons md-only">close</i>
+    </a>
+    <!-- FAB speed dial actions -->
+    <div class="fab-buttons fab-buttons-top">
+      <a href="#tab-3" class="fab-label-button" @click='sentRequest'>
+        <i class="icon f7-icons if-not-md">paperplane_fill</i>
+        <i class="icon material-icons md-only">send</i>
+        <span class="fab-label">Sent request</span>
       </a>
+      </div>
+  </div>
+  <div class="navbar">
+    <div class="navbar-bg"></div>
+    <div class="navbar-inner">
+      <div class="left">
+        <a href="#" class="button" @click ='previouspage'>
+          <i class="icon icon-back"></i>
+         
+          <span class="if-not-md">Back</span>
+        </a>
+      </div>
+    <div class="title">Friends</div>
+    <div class="subnavbar">
+      <!-- Searchbar with auto init -->
+      <form class="searchbar">
+        <div class="searchbar-inner">
+          <div class="searchbar-input-wrap">
+            <input type="search" placeholder="mail or pseudo"id="search" @input="search">
+            <i class="searchbar-icon"></i>
+            <span class="input-clear-button"></span>
+          </div>
+          <span class="searchbar-disable-button if-not-aurora">Cancel</span>
+        </div>
+      </form>
+    </div>
+    
     </div>
   </div>
 
   <!-- Scrollable page content-->
    <div class="page-content">
-
-    <div class="block-title">Friend list</div>
-      <div class="list links-list">
+    <div class="searchbar-backdrop"></div>
+    <div class="block-title">
+      <div class="item-content item-input">
+        <div class="item-inner">
+           
+            <!--a class="button convert-form-to-data" href ='#' @click="search">search</a-->
+            <!--div class="item-title item-label">User found :</div-->
+              <div class="row" >
+                <div id="userFoundPseudo"></div>
+                <a class="button" href ='#' @click="add" id="userFoundButton"></a>
+              </div>
+  
+  
+        </div>
+      </div>
+      </div>
+      <h2>Your friends</h2>
+      <div class="list">
         <ul>
           {{#each friends}}
-            <li>{{pseudo}}</li>
-            <div class="block block-strong row">
-              <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{id}}')">Delete {{pseudo}}</a></div>
+            <li>
+              <div class="row">
+                {{pseudo}}
+            
+              <a class="button convert-form-to-data" href ='#' @click="delete('{{id}}')">Unfriend</a>
             </div>
+          </li>
           {{/each}}
         </ul>
       </div>
+
     </div>
 
    </div>
@@ -53,12 +112,60 @@ return {
           this.$router.navigate('/home');
       });
     },
-    previouspage : function(){
-      this.$router.navigate('/addfriends');
+    add: function() {
+        const id = $$('#userFoundButton').data('id');
+
+        app.methods.tokenHandlingFetch( "/friend/invite/"+id , {method: "PUT"})
+          .then(res => {
+            switch (res.status){
+              case 201:
+                app.dialog.alert('Friend request sent to ' + $$('#userFoundPseudo').text());
+                this.$router.navigate('/home');
+              break;
+              case 208:
+                app.dialog.alert('You have already sent a friend request to ' + $$('#userFoundPseudo').text());
+              break;
+              case 200:
+                app.dialog.alert($$('#userFoundPseudo').text()+ " had already sent you a friend request, you two are now friends !");
+                this.$router.navigate('/home');
+              break;
+              case 404:
+                app.dialog.alert($$('#userFoundPseudo').text()+ " that's you ! You don't need us to localise yourself");
+                this.$router.navigate('/home');
+              break;
+              default:
+                app.dialog.alert("server side error");
+                console.log(res);
+            }
+
+          })
+          .catch(err => app.dialog.alert('Error ' + err))
+      },
+      search: function(){
+        const query = document.getElementById("search").value;
+        app.methods.tokenHandlingFetch( "/search/"+query)
+          .then(res => res.json())
+          .then(json =>{
+            if( json){
+              console.log(json);
+              $$('#userFoundPseudo').text(json.pseudo);
+              var userFoundButton = $$('#userFoundButton')
+              userFoundButton.text("Add friend");
+              userFoundButton.data('id',json._id)
+            }
+          
+
+          })
+      },
+      previouspage:function(){
+      this.$router.navigate('/home');
     },
     monprofil : function(){
       this.$router.navigate('/home');
-    }
+    },
+    sentRequest:function(){
+        this.$router.navigate('/sentRequest')
+      },
   }
 }
 </script>
