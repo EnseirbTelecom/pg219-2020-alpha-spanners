@@ -1,109 +1,45 @@
 <template>
-<div class="page" data-name="sentRequest">
-  <div class="appbar">
-    <div class="appbar-inner">
+<div class="page" data-name="home">
+  <div class="navbar">
+    <div class="navbar-bg"></div>
+    <div class="navbar-inner">
       <div class="left">
-        <a href="#" class="link icon-only panel-open" data-panel="left">
-          <i class="icon f7-icons if-not-md">menu</i>
-          <i class="icon material-icons if-md">menu</i>
+        <a href="#" class="button" @click ='previouspage'>
+          <i class="icon icon-back"></i>
+         
+          <span class="if-not-md">Back</span>
         </a>
       </div>
+
+    
     </div>
   </div>
-
-  <!--div class="toolbar tabbar tabbar-labels toolbar-bottom">
-      <div class="toolbar-inner">
-      <a href="#tab-1" class="link" @click = 'friendList'>
-        <i class="icon f7-icons if-not-md">person_2_fill</i>
-        <i class="icon material-icons md-only">people</i>
-      
-        <span class="tabbar-label">Friendies</span>
-      </a>
-      <a href="#tab-2" class="link" @click = 'addFriend'>
-        <i class="icon f7-icons if-not-md">person_badge_plus_fill</i>
-        <i class="icon material-icons md-only">person_add</i>
-        
-        <span class="tabbar-label">Add friend</span>
-      </a>
-      <a href="#tab-3" class="tab-link-active">
-        <i class="icon f7-icons if-not-md">paperplane_fill</i>
-        <i class="icon material-icons md-only">send</i>
-      
-        <span class="tabbar-label">Sent requests</span>
-      </a>
-    </div>
-  </div-->
-  <div class="page content">
-  <div class="block-title">Feedbacks of sent requests</div>
+  <div class="page-content">
   <div class="list">
     <ul>
       {{#each friends}}
-        {{#js_if "this.status ===  'accepted'"}}
-      <li class="swipeout">
-        <div class="item-content swipeout-content">
-          <div class="item-inner">
-            <div class="item-title">{{receiverSurname}} accepted your invitation</div>
-          </div>
+      {{#js_if "this.status ===  'pending'"}}
+      <li>
+        <div class="row"> 
+        {{pseudo}}
+         <a class="button convert-form-to-data" href ='#' @click="delete('{{id}}')"> Cancel invitation </a>
         </div>
-        <div class="swipeout-actions-left">
-          <a href="#" class="swipeout-delete">Delete</a>
-        </div>
-        {{else}}
-          {{#js_if "this.status ===  'refused'"}}
-          <li class="swipeout">
-            <div class="item-content swipeout-content">
-              <div class="item-inner">
-                <div class="item-title">{{receiverSurname}} refused your invitation</div>
-              </div>
-            </div>
-            <div class="swipeout-actions-left">
-              <a href="#" class="swipeout-delete">Delete</a>
-            </div>
-          </li>
-          {{/js_if}}
+        </li>
          {{/js_if}}
       {{/each}}
     </ul>
   </div>
-
-  <div class="block-title">Sent requests</div>
-  <div class="list">
-    <ul>
-      {{#each friends}}
-       {{#js_if "this.status ===  'pending'"}}
-         
-        <li class="swipeout deleted-callback">
-          <div class="swipeout-content">
-            <a href="#" class="item-link item-content">
-            <div class="item-inner">
-              <div class="item-text">
-                {{receiverSurname}}
-              </div>
-            </div>
-            </a>
-          </div>
-          <div class="swipeout-actions-right">
-            <a href="#" class="swipeout-delete" @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">Cancel</a>
-          </div>
-
-        </li>
-        {{/js_if}}
-      {{/each}}
-    </ul>
-   
   </div>
 
-
-</div>
 </div>
 </template>
 
 <script>
 return{
   async data() {
-    let friends = [];
+    var friends = [];
     try {
-      friends = await fetch( app.data.serverAddress +"/sentRequest/" + app.data.user.id)
+      friends = await app.methods.tokenHandlingFetch( "/friends/sent/all")
         .then(res => res.json())
     }catch(err) {
       app.dialog.alert("Error " + err);
@@ -111,10 +47,11 @@ return{
     finally{
       return { friends: friends };
     }
+
   },
   methods: {
-    delete : function(idexp,iddest,status){
-      fetch( app.data.serverAddress + "/removefriend/" + idexp + '/' + iddest , {
+    delete : function(id){
+      app.methods.tokenHandlingFetch( "/friend/delete/" + id , {
           method: "DELETE",
       })
       .catch(err => app.dialog.alert('Error ' + err))
@@ -123,11 +60,8 @@ return{
         this.$router.navigate('/home');
       });
     },
-    addFriend : function(){
-      this.$router.navigate('/addfriends');
-    },
-    friendList : function(){
-      this.$router.navigate('/friendlist')
+    previouspage:function(){
+      this.$router.navigate('/friendlist');
     },
   }
 }

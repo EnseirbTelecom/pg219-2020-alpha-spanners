@@ -1,5 +1,5 @@
 <template>
-  <div class="page" data-name="formPosition" >
+  <div class="page" data-name="formPosition">
     <div class="appbar">
       <div class="left">
         <a href="#" class="link back">
@@ -43,7 +43,7 @@
                 <div class="item-inner">
                     <div class="item-title item-label">Date and time of validation</div>
                     <div class="item-input-wrap">
-                      <input type="text" placeholder="Select date and time"  readonly="readonly" id="demo-calendar-date-time" >
+                      <input type="text" placeholder="Select date and time"  readonly="readonly" id="calendar-date-arrival" >
                     </div>
                 </div>
               </div>
@@ -54,7 +54,7 @@
                 <div class="item-inner">
                   <div class="item-title item-label">Date of departure</div>
                   <div class="item-input-wrap">
-                    <input type="text" placeholder="Select date and time" readonly="readonly" id="demo-calendar-date-time-second" >
+                    <input type="text" placeholder="Select date and time" readonly="readonly" id="calendar-date-departure" >
                   </div>
                 </div>
               </div>
@@ -84,50 +84,94 @@
 
 return{
    mounted() {
-      var calendarDateTime = app.calendar.create({
-        inputEl: '#demo-calendar-date-time',
+    window.navigator.geolocation.getCurrentPosition(function(position) {
+        var inputLatitude = document.getElementById('latitude')
+        var inputLongitude = document.getElementById('longitude')
+        inputLatitude.value = position.coords.latitude
+        inputLongitude.value = position.coords.longitude
+      },function(error){
+          alert("Error in localisation N° " + error.code + " : " + error.message);
+      });
+        
+      // special variable declaration (-> global) because we need those to be visible outside of the mounted function
+
+      calendarArrival = app.calendar.create({
+        inputEl: '#calendar-date-arrival',
         timePicker: true,
         value: [new Date()],
-        dateFormat: { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' },
+        dateFormat: "HH::mm d/mm/yyyy",
+        disabled:[
+          {to: new Date(Date.now()- 24*60*60*1000)},
+          {from:  new Date(Date.now() +7*24*60*60*1000)}
+        ],
+        on: {
+          close: function(calendar){
+            const dateArriv = calendar.getValue()[0];
+            console.log(dateArriv.valueOf())
+            calendarDeparture.disabled = [
+              {to: new Date( dateArriv.valueOf()-24*60*60*1000)},
+              {from:  new Date( dateArriv.valueOf() +7*24*60*60*1000)}
+            ];
+            if (dateArriv< new Date()){
+              calendar.setValue([new Date()]);
+            }
+            
+            if (calendarDeparture.getValue()[0]<dateArriv){
+              calendarDeparture.setValue( [new Date( dateArriv.valueOf() + 60*60*1000)] );  
+            }
+          }
+        
+        }
       });
+      
+    var firstChangeDeparture = true;
+    calendarDeparture = app.calendar.create({
+      inputEl: '#calendar-date-departure',
+      timePicker: true,
+      value: [new Date(Date.now() +60*60*1000)],
+      dateFormat: "HH::mm d/mm/yyyy",
+      disabled:[
+        {to: new Date(Date.now()- 24*60*60*1000)},
+        {from:  new Date(Date.now() +7*24*60*60*1000)}
+      ],
+      on: {
+        
+        close: function(calendar){
+          const dateDepart = calendar.getValue()[0];
+          if (calendarArrival.getValue()[0]>dateDepart){
+            calendar.setValue( [new Date(calendarArrival.getValue()[0].valueOf() + 60*60*1000)]);  
+          }
+        }
+      
+      }
+    });
 
 
-      var calendarDateTime = app.calendar.create({
-        inputEl: '#demo-calendar-date-time-second',
-        timePicker: true,
-        value: [new Date(Date.now() +60*60*1000)],
-        dateFormat: "HH::mm d/mm",
-      });
     },
-    methods :{
+  
+  methods :{
 
     submit: function() {
-          window.navigator.geolocation.getCurrentPosition(function(position) {
-            var dateTime = document.getElementById('demo-calendar-date-time').value;
-            var period = document.getElementById('demo-calendar-date-time-second').value;
-            const msg = document.getElementById('msg').value;
-            const latitude = document.getElementById('latitude').value;
-            const longitude = document.getElementById('longitude').value;
-            app.data.user.lat = latitude;
-            app.data.user.lng = longitude;
-            console.log(dateTime)
-            const response = fetch(app.data.serverAddress + "/position/" + app.data.user.id , {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  userName : app.data.user.name,
-                  latitude : latitude,
-                  longitude : longitude,
-                  dateTime : dateTime,
-                  period : period,
-                  msg : msg ,
-                  status : 'activated',
-                })
-            }).catch(err => {app.dialog.alert('Error '+ err); throw err;})
-          },function(error){
-            app.dialog.alert("Error in localisation N° " + error.code + " : " + error.message);
-          });
-          this.$router.navigate('/home');
+      const msg         = document.getElementById('msg').value;
+      const latitude    = document.getElementById('latitude').value;
+      const longitude   = document.getElementById('longitude').value;
+      app.data.user.lat = latitude;
+      app.data.user.lng = longitude;
+      app.methods.tokenHandlingFetch("/pos/activate" , {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latitude : latitude,
+          longitude : longitude,
+          arrivalTime : calendarArrival.getValue()[0].toISOString(),
+          departureTime : calendarDeparture.getValue()[0].toISOString(),
+          msg : msg ,
+          })
+      })
+        
+        .catch(err => {app.dialog.alert('Error '+ err); throw err;})
+        .finally(resp => this.$router.navigate('/home'))
+        
     }
   }
 }

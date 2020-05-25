@@ -1,0 +1,118 @@
+<template>
+  <div class="page" data-name="home">
+    <div class="appbar">
+      <div class="left">
+        <a href="#" class="link back">
+          <i class="icon icon-back"></i>
+          Back
+          <span class="if-not-md">Back</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="block-title">Formulaire</div>
+        <form class="list" id="my-form">
+          <ul>
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">Lastname</div>
+                  <div class="item-input-wrap">
+                    <input type="text" name="nom" id='nom' placeholder="Your lastname">
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">Firstname</div>
+                  <div class="item-input-wrap">
+                    <input type="text" name="prenom" id='prenom' placeholder="Your firstname">
+                   </div>
+                 </div>
+               </div>
+            </li>
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">Pseudo</div>
+                  <div class="item-input-wrap">
+                    <input type="text" name="pseudo" id="pseudo" placeholder="Your pseudo">
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">E-mail</div>
+                  <div class="item-input-wrap">
+                    <input type="text" name="mail" id="mail" placeholder="Your Email">
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">Password</div>
+                  <div class="item-input-wrap">
+                    <input type="password" name="password" id="password" placeholder="Your password">
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label">Birthday</div>
+                  <div class="item-input-wrap">
+                    <input type="date" name="birthday" id="birthday" placeholder="Your birthday" value="2020-05-04">
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </form>
+        <div class="block block-strong row">
+           <div class="col"><a class="button convert-form-to-data" href="#" @click = "submit">Submit</a></div>
+        </div>
+    </div>
+</template>
+
+<script>
+return {
+  methods:{
+    submit: async function() {
+          const email = document.getElementById('mail').value;
+          const password = CryptoJS.AES.encrypt(document.getElementById('password').value,'secret key 123').toString();
+          const lastName = document.getElementById('nom').value;
+          const firstName = document.getElementById('prenom').value;
+          const pseudo = document.getElementById('pseudo').value;
+          const bdy = document.getElementById('birthday').value
+
+          try{
+            await fetch(app.data.serverAddress + "/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                mail         : email,
+                password     : password,
+                surname      : lastName,
+                name         : firstName,
+                pseudo       : pseudo,
+                birthday     : bdy,
+              })
+            })
+            .then(res =>res.json())
+            .then(res => (res.error) ? app.dialog.alert(res.error) : this.$router.navigate('/'))
+          }catch(err){
+            app.dialog.alert('Error' + err);
+          }
+
+    }
+  }
+}
+</script>

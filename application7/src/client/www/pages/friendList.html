@@ -1,102 +1,110 @@
 <template>
+<div class="page" data-name="home">
+  <!-- FAB Backdrop -->
+  <div class="fab-backdrop"></div>
 
-      <div class="page" data-name="friendlist" >
-        <!-- FAB Backdrop -->
-       <div class="fab-backdrop"></div>
-
-        <!-- FAB Right Bottom -->
-        <div class="fab fab-right-bottom color-yellow">
-          <a href="#">
-            <!-- Icons For iOS Theme -->
-            <i class="icon f7-icons if-not-md">add</i>
-            <i class="icon f7-icons if-not-md">close</i>
-            <!-- Icons For MD Theme -->
-            <i class="icon material-icons md-only">add</i>
-            <i class="icon material-icons md-only">close</i>
-          </a>
-          <!-- FAB speed dial actions -->
-          <div class="fab-buttons fab-buttons-top">
-            <a href="#tab-2" class="fab-label-button" @click = 'addFriend'>
-              <i class="icon f7-icons if-not-md">person_badge_plus_fill</i>
-              <i class="icon material-icons md-only">person_add</i>
-              <span class="fab-label">Add friend</span>
-            </a>
-            <a href="#tab-3" class="fab-label-button" @click='sentRequest'>
-              <i class="icon f7-icons if-not-md">paperplane_fill</i>
-              <i class="icon material-icons md-only">send</i>
-              <span class="fab-label">Sent request</span>
-            </a>
-            </div>
-        </div>
-      
-      <div class="appbar">
-        <div class="appbar-inner">
-          <div class="left">
-            <a href="#" class="link icon-only panel-open" data-panel="left">
-              <i class="icon f7-icons if-not-md">menu</i>
-              <i class="icon material-icons if-md">menu</i>
-            </a>
-          </div>
-          
-          
-          </div>
-        </div>
-      
-     
-      <div class="page-content">
-        
-       <div class="block-title">List of friends</div>
-        <div class="list">
-          <ul>
-            {{#each friends}}
-            {{#js_if "this.senderId ===  app.data.user.id"}}
-              <a href="#"><li>{{receiverSurname}} {{receiverName}} </li></a>
-              <div class="block block-strong row">
-                <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">Delete {{receiverSurname}}</a></div>
-              </div>
-            {{else}}
-              {{#js_if "this.receiverId === app.data.user.id"}}
-              <a href="#"><li>{{senderSurname}} {{senderName}} </li></a>
-              <div class="block block-strong row">
-                <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{senderId}}','{{receiverId}}','{{status}}')">Delete {{senderSurname}}</a></div>
-              </div>
-              {{/js_if}}
-            {{/js_if}}
-            {{/each}
-          </ul>
-      
-        </div>
-        
+  <!-- FAB Right Bottom -->
+  <div class="fab fab-right-bottom color-yellow">
+    <a href="#">
+      <!-- Icons For iOS Theme -->
+      <i class="icon f7-icons if-not-md">add</i>
+      <i class="icon f7-icons if-not-md">close</i>
+      <!-- Icons For MD Theme -->
+      <i class="icon material-icons md-only">add</i>
+      <i class="icon material-icons md-only">close</i>
+    </a>
+    <!-- FAB speed dial actions -->
+    <div class="fab-buttons fab-buttons-top">
+      <a href="#tab-3" class="fab-label-button" @click='sentRequest'>
+        <i class="icon f7-icons if-not-md">paperplane_fill</i>
+        <i class="icon material-icons md-only">send</i>
+        <span class="fab-label">Sent request</span>
+      </a>
       </div>
+  </div>
+  <div class="navbar">
+    <div class="navbar-bg"></div>
+    <div class="navbar-inner">
+      <div class="left">
+        <a href="#" class="button" @click ='previouspage'>
+          <i class="icon icon-back"></i>
+         
+          <span class="if-not-md">Back</span>
+        </a>
+      </div>
+    <div class="title">Friends</div>
+    <div class="subnavbar">
+      <!-- Searchbar with auto init -->
+      <form class="searchbar">
+        <div class="searchbar-inner">
+          <div class="searchbar-input-wrap">
+            <input type="search" placeholder="mail or pseudo"id="search" @input="search">
+            <i class="searchbar-icon"></i>
+            <span class="input-clear-button"></span>
+          </div>
+          <span class="searchbar-disable-button if-not-aurora">Cancel</span>
+        </div>
+      </form>
+    </div>
+    
+    </div>
+  </div>
+
+  <!-- Scrollable page content-->
+   <div class="page-content">
+    <div class="searchbar-backdrop"></div>
+    <div class="block-title">
+      <div class="item-content item-input">
+        <div class="item-inner">
+           
+            <!--a class="button convert-form-to-data" href ='#' @click="search">search</a-->
+            <!--div class="item-title item-label">User found :</div-->
+              <div class="row" >
+                <div id="userFoundPseudo"></div>
+                <a class="button" href ='#' @click="add" id="userFoundButton"></a>
+              </div>
+  
+  
+        </div>
+      </div>
+      </div>
+      <h2>Your friends</h2>
+      <div class="list">
+        <ul>
+          {{#each friends}}
+            <li>
+              <div class="row">
+                {{pseudo}}
+            
+              <a class="button convert-form-to-data" href ='#' @click="delete('{{id}}')">Unfriend</a>
+            </div>
+          </li>
+          {{/each}}
+        </ul>
+      </div>
+
     </div>
 
-
    </div>
- 
 </div>
-
 </template>
 <script>
-
 return {
   async data() {
-    let friends = [];
-   
+    var friends = [];
     try {
-      friends = await app.methods.tokenHandlingFetch("/friendlist/" + app.data.user.id)
+      friends = await app.methods.tokenHandlingFetch("/friends/list" )
         .then(res => res.json())
-    
     }catch(err) {
       app.dialog.alert("Error " + err);
     }
     finally{
       return { friends: friends };
     }
-   
   },
   methods: {
-    delete : function(idexp,iddest,status){
-      app.methods.tokenHandlingFetch( "/removefriend/" + idexp + '/' + iddest , {
+    delete : function(id){
+      app.methods.tokenHandlingFetch( "/friend/delete/"  + id , {
           method: "DELETE",
       })
       .catch(err => app.dialog.alert('Error ' + err))
@@ -104,30 +112,60 @@ return {
           this.$router.navigate('/home');
       });
     },
+    add: function() {
+        const id = $$('#userFoundButton').data('id');
 
-      delete : function(idexp,iddest,status){
-      fetch( app.data.serverAddress + "/removefriend/" + idexp + '/' + iddest , {
-          method: "DELETE",
-      })
-      .catch(err => app.dialog.alert('Error ' + err))
-      .finally(() => {
-        app.dialog.alert('Canceled invitation !')
-        this.$router.navigate('/home');
-      });
-    },
-    addFriend : function(){
-      this.$router.navigate('/addfriends');
+        app.methods.tokenHandlingFetch( "/friend/invite/"+id , {method: "PUT"})
+          .then(res => {
+            switch (res.status){
+              case 201:
+                app.dialog.alert('Friend request sent to ' + $$('#userFoundPseudo').text());
+                this.$router.navigate('/home');
+              break;
+              case 208:
+                app.dialog.alert('You have already sent a friend request to ' + $$('#userFoundPseudo').text());
+              break;
+              case 200:
+                app.dialog.alert($$('#userFoundPseudo').text()+ " had already sent you a friend request, you two are now friends !");
+                this.$router.navigate('/home');
+              break;
+              case 404:
+                app.dialog.alert($$('#userFoundPseudo').text()+ " that's you ! You don't need us to localise yourself");
+                this.$router.navigate('/home');
+              break;
+              default:
+                app.dialog.alert("server side error");
+                console.log(res);
+            }
+
+          })
+          .catch(err => app.dialog.alert('Error ' + err))
+      },
+      search: function(){
+        const query = document.getElementById("search").value;
+        app.methods.tokenHandlingFetch( "/search/"+query)
+          .then(res => res.json())
+          .then(json =>{
+            if( json){
+              console.log(json);
+              $$('#userFoundPseudo').text(json.pseudo);
+              var userFoundButton = $$('#userFoundButton')
+              userFoundButton.text("Add friend");
+              userFoundButton.data('id',json._id)
+            }
+          
+
+          })
+      },
+      previouspage:function(){
+      this.$router.navigate('/home');
     },
     monprofil : function(){
       this.$router.navigate('/home');
     },
     sentRequest:function(){
-      this.$router.navigate('/sentRequest')
-    },
-    openPopover:function(){
-      dynamicPopover.open();
-    }
-    
+        this.$router.navigate('/sentRequest')
+      },
   }
 }
 </script>

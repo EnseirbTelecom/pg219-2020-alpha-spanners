@@ -1,210 +1,222 @@
 <template>
-<div class="page" data-name="home">
-  <div class="toolbar tabbar toolbar-bottom">
-    <div class="toolbar-inner">
-      <a  class="link" @click="activatePosition">
-        <i class="icon material-icons if-md"> person_pin_circle</i>
-        <span>Activate</span>
+  <div class="page" data-name="home">
+    <div class="toolbar tabbar toolbar-bottom">
+      <div class="toolbar-inner">
+        <a  class="link" @click="activatePosition">
+          <i class="icon material-icons if-md"> add_location</i>
+          <span>Activate</span>
+        </a>
+        <a  class="link"  @click='positionInMap'>
+          
+          <i class="icon material-icons if-md"> map</i>
+          <span>On map</span>
       </a>
-      <a  class="link"  @click='positionInMap'>
-        
-        <i class="icon material-icons if-md"> map</i>
-        <span>On map</span>
-    </a>
-
-
+  
+  
+      </div>
     </div>
-  </div>
-
-  <div id="app">
-     <div id = "my-panel" class="panel panel-left panel-cover theme-color panel-init">
-      <div class="view">
-        <div class="page">
-          <div class="navbar">
-            <div class="navbar-bg"></div>
-            <div class="navbar-inner">
-              <div class="title">FriendFinder</div>
-            </div>
-          </div>
-          <div id = "panelcontent" class="page-content" >
-            <div class="highlights" @click='monprofil'>
-              <div class="username" >
-                {{userName}}
-              </div>
-              <div class="mail">
-                {{mail}}
+    <div id="app">
+      <div id = "my-panel" class="panel panel-left panel-cover theme-color panel-init">
+        <div class="view">
+          <div class="page">
+            <div class="navbar">
+              <div class="navbar-bg"></div>
+              <div class="navbar-inner">
+                <div class="title">FriendFinder</div>
               </div>
             </div>
-            <div class="list">
-              <ul class="ul">
+            <div id = "panelcontent" class="page-content" >
+              <div class="highlights" @click='monprofil'>
+                <div class="username" >
+                  {{pseudo}}
+                </div>
+                <div class="mail">
+                  {{mail}}
+                </div>
+              </div>
+              <div class="list">
+                <ul class="ul">
+                  <li class = 'li'>
+                    <a href="#tab3" class="tab-link panel-close" @click='monprofil'>
+                      <i class="icon f7-icons if-not-md">house_fill</i>
+                      <i class="icon material-icons if-md">home</i>
+                      
+                      <div class="item-inner">
+                        <span class="tabbar-label">Home</span>
+                       </div>
+                    </a>
+                  </li>
+                  <li class = 'li'>
+                    <a href="#tab1" class="tab-link panel-close" @click='pastposition'>
+                      <i class="icon f7-icons if-not-md">square_list_fill</i>
+                      <i class="icon material-icons if-md"> person_pin_circle</i>
+                      <div class="item-inner">
+                      <span class="tabbar-label">Position history</span>
+                      </div>
+                    </a>
+                 </li>
                 <li class = 'li'>
-                  <a href="#tab1" class="tab-link panel-close" @click='pastposition'>
-                    <i class="icon f7-icons if-not-md">square_list_fill</i>
-                    <i class="icon material-icons if-md"> person_pin_circle</i>
+                  <a href="#tab2" class="tab-link panel-close" @click='myfriends'>
+                    <i class="icon f7-icons if-not-md">gear_alt</i>
+                    <i class="icon material-icons if-md">people</i>
+                    
                     <div class="item-inner">
-                    <span class="tabbar-label">Position history</span>
+                     <span class="tabbar-label">Friends</span>
                     </div>
                   </a>
-               </li>
-              <li class = 'li'>
-                <a href="#tab2" class="tab-link panel-close" @click='myfriends'>
-                  <i class="icon f7-icons if-not-md">gear_alt</i>
-                  <i class="icon material-icons if-md">people</i>
-                  
+                </li>
+  
+  
+               </ul>
+              <div class="logout">
+                <a href="#tab5" class="tab-link panel-close"  @click='disconnect'>
+                  <i class="icon f7-icons if-not-md">xmark_circle_fill</i>
+                  <i class="icon material-icons if-md">power_settings_new</i>
                   <div class="item-inner">
-                   <span class="tabbar-label">Friends</span>
-                  </div>
-                </a>
-              </li>
-              <li class = 'li'>
-                <a href="#tab3" class="tab-link panel-close" @click='monprofil'>
-                  <i class="icon f7-icons if-not-md">house_fill</i>
-                  <i class="icon material-icons if-md">home</i>
-                  
-                  <div class="item-inner">
-                    <span class="tabbar-label">Home</span>
+                    <span class="tabbar-label">log out</span>
                    </div>
                 </a>
-              </li>
-
-             </ul>
-            <div class="logout">
-              <a href="#tab5" class="tab-link panel-close"  @click='disconnect'>
-                <i class="icon f7-icons if-not-md">xmark_circle_fill</i>
-                <i class="icon material-icons if-md">power_settings_new</i>
-                <div class="item-inner">
-                  <span class="tabbar-label">log out</span>
-                 </div>
-              </a>
-            </div>
+              </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-  <div class="navbar navbar-small">
-    <div class="navbar-bg"></div>
-    <div class="navbar-inner">
-      <div class="left">
-        <a href="#" class="link icon-only panel-open" data-panel="left">
-          <i class="icon f7-icons if-not-md">menu</i>
-          <i class="icon material-icons if-md">menu</i>
-        </a>
-      </div>
-     
-      <div class="title-small">
-        <div class="title-small-text">FriendFinder</div>
-      </div>
-      <div class="right">
-        <a href="#tab4" class="tab-link panel-close" @click='notification'>
-          <i class="icon f7-icons if-not-md">bell<!--span class="badge bg-red">{{nbNotifs}}</span--></i> 
-          <i class="icon material-icons if-md">notifications<!--span class="badge bg-red">{{nbNotifs}}</span--></i>
-     
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <div class="body">
-      <div id="heading">
-       
-        <div class="row">
-          <div class="col-6 col-12-medium" id="ph">
-            <h1 class="phrase">Share your location with your friends</h1>
-          </div>
-
-      </div>
-    </div>
-   
-    <div class="block-title">Friends' position</div>
-    <div class="list links-list">
-      <ul>
-         {{#each friendsposition}}
-        <a href="#"><li>{{userName}} se trouve à la latitude {{latitude}} et à la longitude {{longitude}}</li></a>
-        <div class="block block-strong row">
-          <div class="col"><a class="button convert-form-to-data" href ='#' @click="visualizeOnmap('{{userId}}')">Visualiser sur une carte</a></div>
-        </div>
-        {{/each}}
-      </ul>
-    </div>
- 
-  </div>
-  </div>
-  
-</div>
-</template>
-<script>
-return {
-  
-  methods : {
-    async data (){
-      let friendsposition = [];
-      let userName;
-      let email;
-      userName = app.data.user.name;
-      email = app.data.user.surname;
-      try {
-        friendsposition = await fetch(app.data.serverAddress + "/friendsposition/" + app.data.user.id)
-          .then(res => res.json());
-      //  resu= await app.methods.tokenHandlingFetch("/nbOfNotifs/" + app.data.user.id)
-         // .then(res => res.json());
-
-
-      } catch(err) {
-        this.$app.dialog.alert("Error " + err);
-        throw err;
-      }
-
-    //  console.log('number is'+ resu.length );
-      return { friendsposition: friendsposition,userName: userName, email: email};
-      
-      
-    },
-    countNotifs: function(){
-      let nbr = app.methods.tokenHandlingFetch("/nbOfNotifs/" + app.data.user.id);
-      console.log('nbr');
-      return nbr;
-
-    },
-
-    obtainPosition : function() {
-      let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id)
-                        .then(res => res.json())
-                        .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$app.dialog.alert(res.latitude + ' ' + res.longitude))
-    },
-    positionInMap : function() {
-      let response = fetch(app.data.serverAddress + "/position/" + app.data.user.id)
-                        .then(res => res.json())
-                        .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate('/map'))
-    },
-
-    activatePosition : function(){
-      this.$router.navigate('/formPosition')
-    },
-    monprofil : function(){
-      this.$router.navigate('/home');
-    },
-    myfriends : function(){
-      this.$router.navigate('/friendlist')
-    },
-    notification: function(){
-      this.$router.navigate('/notif');
-    },
-    disconnect: function(){
-      app.dialog.confirm("Are you sure ?", "Logout", () => this.$router.navigate('/'))
-      
-    },
-    pastposition : function(){
-      this.$router.navigate('/pastpositions')
-    },
-    visualizeOnmap : function(idfriend){
-      this.$router.navigate({
-        name : 'friendmap',
-        params : {idfriend : idfriend}
-      })
-    }
         
+  
+      <div class="navbar navbar-small">
+        <div class="navbar-bg"></div>
+        <div class="navbar-inner">
+          <div class="left">
+            <a href="#" class="link icon-only panel-open" data-panel="left">
+              <i class="icon f7-icons if-not-md">menu</i>
+              <i class="icon material-icons if-md">menu</i>
+            </a>
+          </div>
+         
+          <div class="title-small">
+            <div class="title-small-text">FriendFinder</div>
+          </div>
+          <div class="right">
+            <a href="#tab4" class="tab-link panel-close" @click='notification'>
+              <i class="icon f7-icons if-not-md">bell<!--span class="badge bg-red">{{nbNotifs}}</span--></i> 
+              <i class="icon material-icons if-md">notifications<span class="badge bg-red">{{nbNotifs}}</span></i>
+         
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="body">
+        <div id="heading">
+         
+          <div class="row">
+            <div class="col-6 col-12-medium" id="ph">
+              <h1 class="phrase">Share your location with your friends</h1>
+            </div>
+  
+        </div>
+      </div>
+     
+      <div class="block-title">Friends' position</div>
+      <div class="list">
+        <ul>
+          {{#each friendsposition}}
+          <div class="row">
+
+          <a href="#"><li><i class="icon material-icons if-md">beenhere</i>  {{pseudo}} is currently at ({{latitude}} {{longitude}})</li></a>
+            <a class="button convert-form-to-data" href ='#' @click="visualizeOnmap('{{latitude}}', '{{longitude}}')">see on a map</a>
+          </div>
+          {{/each}}
+        </ul>
+      </div>
+   
+    </div>
+  
+  </div>
+  </template>
+  <script>
+  return {
+    methods : {
+      async data (){
+        var friendsposition = [];
+        var friendreq = [];
+        var sentReq = [];
+        var pseudo;
+        pseudo = app.data.user.pseudo;
+        var nbNotifs;
+        try {
+          friendsposition = await app.methods.tokenHandlingFetch("/pos/friends")
+            .then(res => res.json());
+          friendreq = await app.methods.tokenHandlingFetch("/friends/received/pending")
+            .then(res => res.json());
+            sentReq = await app.methods.tokenHandlingFetch( "/friends/sent/accepted")
+           .then(res => res.json())
+        } catch(err) {
+          this.$app.dialog.alert("Error " + err);
+          throw err;
+        }
+        nbNotifs= Object.keys(friendreq).length + Object.keys(sentReq).length;
+        return { friendsposition: friendsposition, pseudo: pseudo, nbNotifs: nbNotifs};
+      },
+      obtainPosition : function() {
+        app.methods.tokenHandlingFetch( "/pos/current")
+          .then(res => res.json())
+          .then(res => {
+            console.log(res)
+            if (res && res.longitude && res.latitude ){
+              this.$app.dialog.alert(res.latitude + ' ' + res.longitude)
+            } else {
+              this.$app.dialog.alert("You must activate you localisation first !")
+            }
+          })
+      },
+      positionInMap : function() {
+        app.methods.tokenHandlingFetch("/pos/current" )
+          .then(res => res.json())
+          .then(res => {
+            if (res && res.longitude && res.latitude ){
+              this.$router.navigate({
+                name : 'map',
+                params : {latitude : res.latitude, longitude: res.longitude}
+              })
+            } else {
+              this.$app.dialog.alert("You must activate you localisation first !")
+            }
+          })
+      },
+      activatePosition : function(){
+        this.$router.navigate('/formPosition')
+      },
+      monprofil : function(){
+        this.$router.navigate('/home');
+      },
+      myfriends : function(){
+        this.$router.navigate('/friendlist')
+      },
+      notification: function(){
+        this.$router.navigate('/notif');
+      },
+      disconnect: function(){
+        app.dialog.confirm("Are you sure ?", "Logout", () => this.$router.navigate('/'))
+        
+      },
+      sentRequest:function(){
+        this.$router.navigate('/sentRequest')
+      },
+      addFriend : function(){
+        this.$router.navigate('/addfriends')
+      },
+      pastposition : function(){
+        this.$router.navigate('/pastpositions')
+      },
+      visualizeOnmap : function(lat, long){
+        this.$router.navigate({
+          name : 'map',
+          params : {latitude : lat, longitude: long}
+        })
+      }
+          
+    }
   }
-}
-</script>
+  </script>
+  

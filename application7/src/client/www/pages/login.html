@@ -1,0 +1,103 @@
+<template>
+  <div class="page" data-name="login">
+    <div class="limiter">
+      <div class="container-login100">
+        <div class="wrap-login100">
+          <form class="login100-form validate-form">
+            <span class="login100-form-title p-b-26">
+              Welcome
+            </span>
+            <span class="login100-form-title p-b-48">
+              <i class="zmdi zmdi-font"></i>
+            </span>
+
+            <div class="wrap-input100 validate-input" data-validate = "Valid email is: a@b.c">
+              <input class="input100" type="text" id='mail1' name="email">
+              <span class="focus-input100" id='mail1' data-placeholder="Email"></span>
+            </div>
+
+            <div class="wrap-input100 validate-input" data-validate="Enter password">
+              <span class="btn-show-pass">
+                <i class="zmdi zmdi-eye"></i>
+              </span>
+              <input class="input100" type="password" id='password1' name="pass">
+              <span class="focus-input100" id='password1' data-placeholder="Password"></span>
+            </div>
+
+            <div class="container-login100-form-btn">
+              <div class="wrap-login100-form-btn">
+                <div class="login100-form-bgbtn"></div>
+                <a class="button convert-form-to-data"  href="#" @click ="login">
+                  Login
+                </a>
+              </div>
+            </div>
+
+            <div class="text-center p-t-115">
+              <span class="txt1">
+                Don’t have an account?
+              </span>
+
+              <a class="button convert-form-to-data" href="/register">
+                Sign Up
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+
+</template>
+<script>
+
+
+return {
+    methods:{
+      handle_connected : function(jsonRes){
+        if (jsonRes.error){
+          app.dialog.alert(jsonRes.error);
+        }
+        else {
+          localStorage.token = jsonRes.token;
+          localStorage.tokenExp = jsonRes.tokenExp;
+          app.data.user = {
+            name : jsonRes.name,
+            surname : jsonRes.surname,
+            id : jsonRes.id,
+            pseudo : jsonRes.pseudo,
+            birthday : "",
+          }
+          localStorage.userJson = JSON.stringify(app.data.user)
+          this.$router.navigate('/home')
+        }
+      },
+    //},
+      login: async function() {
+        // encrypted password : partie client
+        const mail = document.getElementById('mail1').value;
+        const password = CryptoJS.AES.encrypt(document.getElementById('password1').value,'secret key 123').toString();
+        //let password=CryptoJS.AES.encrypt(document.getElementById('password').value,'secret key 123').toString();
+        try{
+          const reponse = await fetch( app.data.serverAddress +"/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              mail : mail,
+              password : password,
+            })
+          })
+          .then(res =>res.json())
+          // .then(res => (res.error) ? this.$app.dialog.alert(res.error) : this.$router.navigate('/profile/'+res.token))
+          .then( this.handle_connected)
+        }
+        catch(err){
+          app.dialog.alert('Error' + err);
+          throw err;
+        }
+      }
+    }
+}
+
+</script>
