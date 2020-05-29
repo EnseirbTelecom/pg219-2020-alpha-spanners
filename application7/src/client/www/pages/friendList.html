@@ -38,7 +38,7 @@
       <form class="searchbar">
         <div class="searchbar-inner">
           <div class="searchbar-input-wrap">
-            <input type="search" placeholder="mail or pseudo"id="search" @input="search">
+            <input type="search" placeholder="mail or pseudo"id="search" @input="threadLauncher">
             <i class="searchbar-icon"></i>
             <span class="input-clear-button"></span>
           </div>
@@ -113,41 +113,43 @@ return {
       });
     },
     add: function() {
-        const id = $$('#userFoundButton').data('id');
+      const id = $$('#userFoundButton').data('id');
 
-        app.methods.tokenHandlingFetch( "/friend/invite/"+id , {method: "PUT"})
-          .then(res => {
-            switch (res.status){
-              case 201:
-                app.dialog.alert('Friend request sent to ' + $$('#userFoundPseudo').text());
-                this.$router.navigate('/home');
-              break;
-              case 208:
-                app.dialog.alert('You have already sent a friend request to ' + $$('#userFoundPseudo').text());
-              break;
-              case 200:
-                app.dialog.alert($$('#userFoundPseudo').text()+ " had already sent you a friend request, you two are now friends !");
-                this.$router.navigate('/home');
-              break;
-              case 404:
-                app.dialog.alert($$('#userFoundPseudo').text()+ " that's you ! You don't need us to localise yourself");
-                this.$router.navigate('/home');
-              break;
-              default:
-                app.dialog.alert("server side error");
-                console.log(res);
-            }
+      app.methods.tokenHandlingFetch( "/friend/invite/"+id , {method: "PUT"})
+        .then(res => {
+          switch (res.status){
+            case 201:
+              app.dialog.alert('Friend request sent to ' + $$('#userFoundPseudo').text());
+              this.$router.navigate('/home');
+            break;
+            case 208:
+              app.dialog.alert('You have already sent a friend request to ' + $$('#userFoundPseudo').text());
+            break;
+            case 200:
+              app.dialog.alert($$('#userFoundPseudo').text()+ " had already sent you a friend request, you two are now friends !");
+              this.$router.navigate('/home');
+            break;
+            case 404:
+              app.dialog.alert($$('#userFoundPseudo').text()+ " that's you ! You don't need us to localise yourself");
+              this.$router.navigate('/home');
+            break;
+            default:
+              app.dialog.alert("server side error");
+              console.log(res);
+          }
 
-          })
-          .catch(err => app.dialog.alert('Error ' + err))
+        })
+        .catch(err => app.dialog.alert('Error ' + err))
       },
       search: function(){
         const query = document.getElementById("search").value;
+        if (query.length < 4){
+          return
+        }
         app.methods.tokenHandlingFetch( "/search/"+query)
           .then(res => res.json())
           .then(json =>{
             if( json){
-              console.log(json);
               $$('#userFoundPseudo').text(json.pseudo);
               var userFoundButton = $$('#userFoundButton')
               userFoundButton.text("Add friend");
@@ -157,15 +159,35 @@ return {
 
           })
       },
-      previouspage:function(){
-      this.$router.navigate('/home');
-    },
-    monprofil : function(){
-      this.$router.navigate('/home');
-    },
-    sentRequest:function(){
-        this.$router.navigate('/sentRequest')
+      threadCanceler: function(globalIndex, localIndex){
+        //this function is canceled if globalIndex has changed since localIndex 
+        if (globalIndex === localIndex){
+          this.search();
+        }
+        
       },
-  }
+      threadLauncher: async function(){
+        //this function launch threadCanceler with a timeout,
+        // if threadLauncher is called before the end of timeout this previous call won't call search
+        //the result is that the search will be called only when the user stop typing for timeout
+        if (this.staticVar === undefined){
+          this.staticVar = 1;
+        } else {
+          this.staticVar++;
+        }
+        const localIndex = this.staticVar;
+        setTimeout(() => this.threadCanceler(this.staticVar, localIndex), 1000 )    
+      },
+      
+      previouspage:function(){
+        this.$router.navigate('/home');
+      },
+      monprofil : function(){
+        this.$router.navigate('/home');
+      },
+      sentRequest:function(){
+          this.$router.navigate('/sentRequest')
+        },
+    }
 }
 </script>

@@ -40,6 +40,26 @@
 return {
 
     methods : {
+      threadCanceler: function(globalIndex, localIndex){
+        //this function is canceled if globalIndex has changed since localIndex 
+        if (globalIndex === localIndex){
+          search();
+        }
+        
+      },
+      threadLauncher: async function(){
+        //this function launch threadCanceler with a timeout,
+        // if threadLauncher is called before the end of timeout this previous call won't call search
+
+        //the result is that the search will be called only when the user stop typing for timeout
+        if (this.staticVar === undefined){
+          this.staticVar = 1;
+        } else {
+          this.staticVar++;
+        }
+        const localIndex = this.staticVar;
+        setTimeout(() =>threadCanceler(this.staticVar, localIndex), 500 )    
+      },
       add: function() {
         const id = $$('#userFoundButton').data('id');
 
@@ -71,6 +91,9 @@ return {
       },
       search: function(){
         const query = document.getElementById("search").value;
+        if (query === ""){
+          return
+        }
         app.methods.tokenHandlingFetch( "/search/"+query)
           .then(res => res.json())
           .then(json =>{
