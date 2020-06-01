@@ -16,10 +16,10 @@ return {
           alert(this.$route.params.latitude + ' ' + this.$route.params.longitude)
           var map = new google.maps.Map(document.getElementById('mapfriend'), {
             zoom: 8,
-            center: {lat: parseInt(this.$route.params.latitude), lng: parseInt(this.$route.params.longitude)}
+            center: {lat: parseFloat(this.$route.params.latitude), lng: parseFloat(this.$route.params.longitude)}
           });
 
-          var myLatLng = { lat: parseInt(this.$route.params.latitude), lng: parseInt(this.$route.params.longitude) };
+          var myLatLng = { lat: parseFloat(this.$route.params.latitude), lng: parseFloat(this.$route.params.longitude) };
           var marker = new google.maps.Marker(
               {
                 position: myLatLng,

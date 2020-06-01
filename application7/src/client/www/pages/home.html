@@ -1,5 +1,5 @@
 <template>
-  <div class="page" data-name="home">
+  <div class="page" data-name="home" style="height: 100%;display: flex;flex-direction: column;">
     <div class="toolbar tabbar toolbar-bottom">
       <div class="toolbar-inner">
         <a  class="link" @click="activatePosition">
@@ -106,46 +106,63 @@
           </div>
         </div>
       </div>
-      <div class="body">
-        <div id="heading">
-         
-          <div class="row">
-            <div class="col-6 col-12-medium" id="ph">
-              <h1 class="phrase">Share your location with your friends</h1>
-            </div>
-  
-        </div>
-      </div>
-     
+    </div>
+    <div id="mapfriend" style="min-height: 50%; flex:none"> </div>
+    <div class="page-content" style="flex:auto; overflow-y:scroll">
       <div class="block-title">Friends' position</div>
-      <div class="list">
+      
+      <div class="list media-list no-hairlines-between" >
         <ul>
-          {{#each friendsposition}}
-          <div class="row">
-
-          <a href="#"><li><i class="icon material-icons if-md">beenhere</i>  {{pseudo}} is currently at ({{latitude}} {{longitude}})</li></a>
-            <a class="button convert-form-to-data" href ='#' @click="visualizeOnmap('{{latitude}}', '{{longitude}}')">see on a map</a>
-          </div>
+          {{#each friendsPosition}}
+          <li class="accordion-item">
+            <button href="#" id="{{@index}}" class="item-link item-content segmented-strong" @click="selectPosition('{{@index}}')">
+            <div class="item-inner">
+              <div class="item-title-row">
+                <div class="item-title">{{pseudo}} </div>
+                <div class="item-after">{{dateFormat dateArrival}} => </div>
+              </div>
+              <!-- <div class="item-subtitle">is currently at ({{latitude}} {{longitude}})</div> -->
+              <div class="accordion-item-content">        
+                <div >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sagittis tellus ut turpis condimentum, ut dignissim lacus tincidunt. Cras dolor metus, ultrices condimentum sodales sit amet, pharetra sodales eros. Phasellus vel felis tellus. Mauris rutrum ligula nec dapibus feugiat. In vel dui laoreet, commodo augue id, pulvinar lacus.</div>
+              </div>
+            </div>
+            </button>
+            <hr style="height:0px ;border-width:1px;border-color:#d3d3d333 ; color: #d3d3d333; background-color:#d3d3d333">
+          </li>
           {{/each}}
         </ul>
       </div>
-   
     </div>
-  
+
+    <input id="clipStorage" type="text" style="height:12px; flex:none">"> <!-- a hidden input area, purpose : set desired content into it then copy it to clipboard -->
   </div>
+  
   </template>
   <script>
+  var notifClip = app.notification.create({
+    icon: '<i class="icon f7-icons">doc_on_clipboard</i>',
+    title: 'Clipboard',
+    titleRightText: 'now',
+    subtitle: 'Coordinates were added to your clipboard',
+    closeOnClick: true,
+    closeTimeout: 2000,
+  })
+  console.log(notifClip)
   return {
     methods : {
       async data (){
-        var friendsposition = [];
+        const list = [0,0,0,0,0,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0,0];
+        const friendposition = list.map((i) => {return {pseudo : "test", latitude: Math.random()*20 , longitude:Math.random()*20, dateArrival: (new Date()).toISOString()}})
+        
+        return { friendsPosition: friendposition, pseudo: "devmode", nbNotifs: 0};
+        var friendsPosition = [];
         var friendreq = [];
         var sentReq = [];
         var pseudo;
         pseudo = app.data.user.pseudo;
         var nbNotifs;
         try {
-          friendsposition = await app.methods.tokenHandlingFetch("/pos/friends")
+          friendsPosition = await app.methods.tokenHandlingFetch("/pos/friends")
             .then(res => res.json());
           friendreq = await app.methods.tokenHandlingFetch("/friends/received/pending")
             .then(res => res.json());
@@ -156,7 +173,7 @@
           throw err;
         }
         nbNotifs= Object.keys(friendreq).length + Object.keys(sentReq).length;
-        return { friendsposition: friendsposition, pseudo: pseudo, nbNotifs: nbNotifs};
+        return { friendsPosition: friendsPosition, pseudo: pseudo, nbNotifs: nbNotifs};
       },
       obtainPosition : function() {
         app.methods.tokenHandlingFetch( "/pos/current")
@@ -214,9 +231,89 @@
           name : 'map',
           params : {latitude : lat, longitude: long}
         })
+      },
+      toclipboardCallback : function(){
+        //copy coords to clipboard ---
+        const existsTextarea = document.getElementById("clipStorage")
+        const curPos = this.friendsPosition[this.curPosIndex]
+        existsTextarea.value = "("+String(curPos.latitude)+", "+String(curPos.longitude)+")" ;
+        existsTextarea.select();
+
+        try {
+          var status = document.execCommand('copy');
+          if(!status){
+            console.error("Cannot copy text");
+          }else{
+            console.log("The text is now on the clipboard");
+          }
+        } catch (err) {
+          console.log('Unable to copy.');
+        }
+        existsTextarea.value ="";
+        // ---
+        notifClip.open();
+
+      },
+      selectPosition: function(index){
+        if (this.mapInfoWindow !== undefined){
+
+          this.mapInfoWindow.close()
+          this.mapMarkers[index].setMap(null);
+          const oldEls = $$("#"+this.curPosIndex)
+          oldEls.removeClass("bg-color-white")
+          oldEls.off("taphold", this.toclipboardCallback)
+          if( this.curPosIndex != index){
+            app.accordion.close( oldEls.parent())
+          }
+          
+        }
+        this.curPosIndex = index;
+        this.mapMarkers[index].setMap(this.map);
+        this.mapInfoWindow = new google.maps.InfoWindow({
+          content: this.friendsPosition[index].pseudo
+        });
+        this.mapInfoWindow.open(this.map,this.mapMarkers[index])
+        this.map.setCenter({
+          lat: this.friendsPosition[index].latitude,
+          lng: this.friendsPosition[index].longitude
+        });
+        const els = $$("#"+index)
+        els.addClass("bg-color-white")
+        els.on("taphold", this.toclipboardCallback )
+        
+        app.accordion.open( els.parent());
+        els.parent()[0].scrollIntoView();
+       
       }
           
-    }
+    },
+    on: {
+      pageInit: function(e, page) {
+        this.map = new google.maps.Map(document.getElementById('mapfriend'), {
+          zoom: 8,
+          center: {lat: 0, lng: 0}
+        });
+        this.mapMarkers = [];
+        console.log(this)
+        var tmp;
+        for (const [index, pos] of this.friendsPosition.entries()){
+          tmp = new google.maps.Marker({
+            position: {lat: pos.latitude, lng: pos.longitude},
+            label: pos.pseudo.slice(0,3),
+            title: pos.pseudo,
+          });
+          tmp.addListener('click',() => this.selectPosition(index) )
+          this.mapMarkers.push(tmp)
+        }
+        this.map.setCenter({
+          lat: this.friendsPosition[0].latitude,
+          lng: this.friendsPosition[0].longitude
+        });
+        var markerCluster = new MarkerClusterer(this.map, this.mapMarkers)
+
+
+      }
+   }
   }
   </script>
   

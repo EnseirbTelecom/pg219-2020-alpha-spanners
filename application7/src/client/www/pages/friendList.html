@@ -119,14 +119,29 @@ return {
         .then(res => {
           switch (res.status){
             case 201:
-              app.dialog.alert('Friend request sent to ' + $$('#userFoundPseudo').text());
+              app.notification.create({
+                titleRightText: 'now',
+                icon: '<i class="icon f7-icons">person_crop_circle_badge_plus</i>',
+                title: "Friend request",
+                subtitle: 'Friend request sent to ' + $$('#userFoundPseudo').text(),
+                closeOnClick: true,
+                closeTimeout: 4000,
+              }).open()
               this.$router.navigate('/home');
             break;
             case 208:
               app.dialog.alert('You have already sent a friend request to ' + $$('#userFoundPseudo').text());
             break;
             case 200:
-              app.dialog.alert($$('#userFoundPseudo').text()+ " had already sent you a friend request, you two are now friends !");
+              app.notification.create({
+                titleRightText: 'now',
+                icon: '<i class="icon f7-icons">person_crop_circle_badge_checkmark</i>',
+                title: "Friend added",
+                subtitle: $$('#userFoundPseudo').text()+ " had already sent you a friend request, you two are now friends !",
+                closeOnClick: true,
+                closeTimeout: 5000,
+              }).open()
+
               this.$router.navigate('/home');
             break;
             case 404:
