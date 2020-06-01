@@ -258,8 +258,10 @@
         if (this.mapInfoWindow !== undefined){
 
           this.mapInfoWindow.close()
-          this.mapMarkers[index].setMap(null);
+          this.mapMarkers[this.curPosIndex].setMap(null);
+
           const oldEls = $$("#"+this.curPosIndex)
+          
           oldEls.removeClass("bg-color-white")
           oldEls.off("taphold", this.toclipboardCallback)
           if( this.curPosIndex != index){
@@ -269,21 +271,24 @@
         }
         this.curPosIndex = index;
         this.mapMarkers[index].setMap(this.map);
-        this.mapInfoWindow = new google.maps.InfoWindow({
-          content: this.friendsPosition[index].pseudo
-        });
-        this.mapInfoWindow.open(this.map,this.mapMarkers[index])
+
+
         this.map.setCenter({
           lat: this.friendsPosition[index].latitude,
           lng: this.friendsPosition[index].longitude
         });
+        
         const els = $$("#"+index)
         els.addClass("bg-color-white")
         els.on("taphold", this.toclipboardCallback )
         
         app.accordion.open( els.parent());
         els.parent()[0].scrollIntoView();
-       
+
+        this.mapInfoWindow = new google.maps.InfoWindow({
+          content: this.friendsPosition[index].pseudo
+        });
+        this.mapInfoWindow.open(this.map,this.mapMarkers[index])
       }
           
     },
@@ -294,22 +299,31 @@
           center: {lat: 0, lng: 0}
         });
         this.mapMarkers = [];
+        var clusterMarker = [];
         console.log(this)
-        var tmp;
+        var tmp,tmp2,data;
         for (const [index, pos] of this.friendsPosition.entries()){
-          tmp = new google.maps.Marker({
+          data = {
             position: {lat: pos.latitude, lng: pos.longitude},
             label: pos.pseudo.slice(0,3),
             title: pos.pseudo,
-          });
+          }
+          tmp = new google.maps.Marker(data);
           tmp.addListener('click',() => this.selectPosition(index) )
-          this.mapMarkers.push(tmp)
+          clusterMarker.push(tmp)
+          this.mapMarkers.push(new google.maps.Marker(data))
+          // We make too sets of markers:
+          // one managed by cluster, the other popping only when selected (possibly on top the one managed by cluster if it is not clustered)
+          //Why ? beacause adding a infoWindow on top of a marker manager by cluster might cause unwanted behaviour
+          //if the cluster algorithm remove the marker with the infoWindow from the map, and then we trie to close the infoWindow it won't work. 
+          //And we find ourselves with multiple infoWindow open.
         }
         this.map.setCenter({
           lat: this.friendsPosition[0].latitude,
           lng: this.friendsPosition[0].longitude
         });
-        var markerCluster = new MarkerClusterer(this.map, this.mapMarkers)
+     
+        var markerCluster = new MarkerClusterer(this.map, clusterMarker)
 
 
       }
