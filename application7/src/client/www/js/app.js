@@ -1,5 +1,6 @@
 var $$ = Dom7;
 
+Template7.registerHelper("dateFormat", time => (new Date(time)).toLocaleString("en-Gb").slice(0,17) );
 
 var app = new Framework7({
   root: '#app', // App root element

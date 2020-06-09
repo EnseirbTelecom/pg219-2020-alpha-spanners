@@ -163,14 +163,22 @@ function implement(app,database){
   })
   //accept an invitation
   app.put('/friend/accept/:otherId', verifyToken, (req,res) => {
-    database.collection('friends').updateOne({receiverId : ObjectID(req.userId), senderId : ObjectID(req.params.otherId)},{$set: {status : 'accepted' }})
+    database.collection('friends').updateOne(
+      { receiverId : ObjectID(req.userId), senderId : ObjectID(req.params.otherId) },
+      { $currentDate: { lastModified: true } },
+      { $set: {status : 'accepted' } }
+    )
       .then(command =>  (command.matchedCount) ? res.sendStatus(200): res.sendStatus(404))
       .catch(err => res.sendStatus(500))
 
   })
   //refuse an invitation
   app.put('/friend/refuse/:otherId', verifyToken, (req,res) => {
-    database.collection('friends').updateOne({receiverId : ObjectID(req.userId), senderId : ObjectID(req.params.otherId)},{$set: {status : 'refused' }})
+    database.collection('friends').updateOne(
+      { receiverId : ObjectID(req.userId), senderId : ObjectID(req.params.otherId) },
+      { $currentDate: { lastModified: true } },
+      { $set: {status : 'refused' } }
+    )
       .then(command =>  (command.matchedCount) ? res.sendStatus(200): res.sendStatus(404))
       .catch(err => res.sendStatus(500))
 
@@ -191,7 +199,8 @@ function implement(app,database){
             senderPseudo    : req.userPseudo,
             receiverPseudo  : values[0].pseudo,
             receiverId      :  ObjectID(req.params.otherId),
-            status          : 'pending'
+            status          : 'pending',
+            lastModified    : new Date()
           };
           database.collection('friends').insertOne( invit)
             .then( result => res.sendStatus(201) )
@@ -205,7 +214,11 @@ function implement(app,database){
             })
         } else {
           if (values[1]) { //the receiver has already sent an invite to the user, we accept it
-            database.collection('friends').updateOne({_id: values[1]._id},{$set : {status: 'accepted'}})
+            database.collection('friends').updateOne(
+              { _id: values[1]._id},
+              { $currentDate: { lastModified: true } },
+              { $set : { status: 'accepted' } }
+            )
               .then(val => res.sendStatus(200))
               .catch( err => res.sendStatus(500) )
           } else { //the user was not found
@@ -224,9 +237,9 @@ function implement(app,database){
     database.collection('friends').aggregate( [
       {$match : match},
       {$project: {_id: 0 , id: "$receiverId", pseudo: "$receiverPseudo", status:1 }}
-    ]).toArray()
-      .then(sent => res.json(sent))
-      .catch(err => {res.sendStatus(500); throw err})
+    ]).sort( { lastModified: -1 } ).toArray()
+      .then( sent => res.json(sent))
+      .catch( err => {res.sendStatus(500); throw err})
   })
   
 
@@ -235,10 +248,10 @@ function implement(app,database){
     const match = (["accepted", "refused", "pending"].indexOf(req.params.status) > -1) ? { receiverId : ObjectID( req.userId), status : req.params.status } : { receiverId : ObjectID( req.userId)};
     database.collection('friends').aggregate( [
       {$match : match},
-      {$project: {_id: 0 , id: "$senderId", pseudo: "$senderPseudo", status:1 }}
-    ]).toArray()
-      .then(received => res.json(received))
-      .catch(err => {res.sendStatus(500); throw err})
+      {$project: {_id: 0 , id: "$senderId", pseudo: "$senderPseudo", status: 1, lastModified: 1 }}
+    ]).sort( { lastModified: -1 } ).toArray()
+      .then( received => res.json(received))
+      .catch( err => {res.sendStatus(500); throw err})
   })
 
   //gets the friend list
@@ -246,14 +259,15 @@ function implement(app,database){
     const userObjectId = ObjectID(req.userId);
     database.collection('friends').aggregate([
       {$match: {
-        $or: [{senderId: userObjectId},{receiverId: userObjectId} ],
+        $or: [ {senderId: userObjectId}, {receiverId: userObjectId} ],
         status: 'accepted'
       }},
       {$replaceWith : {
-        $cond: 
-        {if : {$eq: ["$senderId",userObjectId]},
-        then : {id: "$receiverId", pseudo: "$receiverPseudo"},
-        else : {id: "$senderId", pseudo: "$senderPseudo"}}
+        $cond: {
+          if : { $eq: ["$senderId",userObjectId] },
+          then : {id: "$receiverId", pseudo: "$receiverPseudo"},
+          else : {id: "$senderId", pseudo: "$senderPseudo"}
+        }
       }}
     ]).toArray()
       .then(friends => res.json(friends))
@@ -279,7 +293,8 @@ function implement(app,database){
     app.get('/pos/friends',  verifyToken, (req,res) => {
       database.collection('friends').aggregate([
         {$match: {
-          $or: [{senderId: ObjectID(req.userId)},{receiverId: ObjectID(req.userId)} ]
+          $or: [{senderId: ObjectID(req.userId)},{receiverId: ObjectID(req.userId)} ],
+          status: 'accepted'
         }},
         {$group: {
           _id: null,
@@ -296,7 +311,7 @@ function implement(app,database){
             const now = new Date();
             database.collection('positions').find(
                { userId : {$in : friendsIds}, arrivalTime : {$lt : now}, departureTime : {$gte : now }  }
-            ).toArray()
+            ).sort( { arrivalTime: -1, departureTime: 1 } ).toArray()
               .then(result => res.json(result))
           } else {
             res.json([])
@@ -327,7 +342,7 @@ function implement(app,database){
       database.collection('positions').find(
          { userId : ObjectID(req.userId),  departureTime : {$lte : new Date() } },
           { userId: 0,  userPseudo: 0 }
-      ).toArray()
+      ).sort( { arrivalTime: -1, departureTime: -1 } ).toArray()
         .then(positions => res.json(positions))
         .catch(err => {console.log(err), res.sendStatus(500)})
     })
@@ -337,7 +352,7 @@ function implement(app,database){
       database.collection('positions').find(
          { userId :  ObjectID(req.userId),  arrivalTime : {$gte : new Date() } },
          { userId: 0,  userPseudo: 0 }
-      ).toArray()
+      ).sort( { arrivalTime: 1, departureTime: 1 } ).toArray()
         .then(positions => res.json(positions))
         .catch(err => {console.log(err), res.sendStatus(500)})
     })

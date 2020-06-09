@@ -12,26 +12,41 @@
   </div>
   <!-- Scrollable page content-->
   <div class="page-content">
+    <div class="block-title">My scheduled positions</div>
+
+    <div class="list links-list">
+      <ul>
+        {{#each futurePos}}
+        <a href="#"><li> ( {{latitude}} ,  {{longitude}}) &nbsp;&nbsp;&nbsp; {{dateFormat arrivalTime}} -> {{dateFormat departureTime}}</li></a>
+        <div class="block block-strong row">
+          <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{_id}}')">Delete position</a></div>
+        </div>
+        <div class="block block-strong row">
+          <div class="col"><a class="button convert-form-to-data" href ='#' @click="positionOnmap('{{latitude}}','{{longitude}}')">Visualize on a map</a></div>
+        </div>
+        {{/each}}
+      </ul>
+    </div>
     <div class="block-title">My past positions</div>
 
-      <div class="list links-list">
-        <ul>
-          {{#each pastpositions}}
-          <a href="#"><li>Cette position (latitude : {{latitude}} , longitude : {{longitude}}) a été activée à {{dateTime}} , je l'ai désormais désactivée </li></a>
-          <div class="block block-strong row">
-            <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{_id}}')">Delete position</a></div>
-          </div>
-          <div class="block block-strong row">
-            <div class="col"><a class="button convert-form-to-data" href ='#' @click="positionOnmap('{{_id}}')">Visualize on a map</a></div>
-          </div>
-          {{/each}}
-        </ul>
-      </div>
+    <div class="list links-list">
+      <ul>
+        {{#each pastPos}}
+        <a href="#"><li> ( {{latitude}} ,  {{longitude}}) &nbsp;&nbsp;&nbsp; {{dateFormat arrivalTime}} -> {{dateFormat departureTime}}</li></a>
+        <div class="block block-strong row">
+          <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{_id}}')">Delete position</a></div>
+        </div>
+        <div class="block block-strong row">
+          <div class="col"><a class="button convert-form-to-data" href ='#' @click="positionOnmap('{{latitude}}','{{longitude}}')">Visualize on a map</a></div>
+        </div>
+        {{/each}}
+      </ul>
     </div>
+  </div>
 
-    <div class="block block-strong row">
-       <div class="col"><a class="button convert-form-to-data" href="#" @click='submit'>Return home</a></div>
-    </div>
+  <div class="block block-strong row">
+      <div class="col"><a class="button convert-form-to-data" href="#" @click='submit'>Return home</a></div>
+  </div>
 
   </div>
 </div>
@@ -40,16 +55,22 @@
 
 return {
   async data (){
-      try {
-        const pastpositions = await app.methods.tokenHandlingFetch("/pos/past" )
-          .then(res => res.json());
-      } catch(err) {
-        this.$app.dialog.alert("Error " + err);
-      }
-      return { pastpositions: pastpositions };
+    const pPast = app.methods.tokenHandlingFetch("/pos/past" )
+      .then(res => res.json());
+    const pSched = app.methods.tokenHandlingFetch("/pos/future" )
+      .then(res => res.json());
+      
+    const res =  await Promise.all([pPast, pSched]).catch(err => this.$app.dialog.alert("Error " + err))
+
+    if (res){
+      return { pastPos: res[0], futurePos: res[1] };
+    } else {
+      return { pastPos: [], futurePos: [] };
+    }
+    
   },
   methods:{
-    submit:function(){
+    submit: function(){
       this.$router.navigate('/home');
     },
     delete : function(idposition){
@@ -61,11 +82,14 @@ return {
         .catch(err => app.dialog.alert('Error ' + err))
 
     },
-    positionOnmap : function(id){
+    positionOnmap : function(lat,long){
       this.$router.navigate(
         {
-          name:'latlngOnmap',
-          params: {idposition : id},
+          name:'map',
+          params: {
+            latitude  : lat,
+            longitude : long
+          },
         });
     }
   }
