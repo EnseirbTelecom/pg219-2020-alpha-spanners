@@ -335,11 +335,16 @@ function implement(app,database){
       }else if (checkCoord(req.body.longitude)){
         res.status(400).json("Longitude invalid");
       }
+      var arrivalTime;
+      var departureTime;
       try{
-        const arrivalTime  = new Date(req.body.arrivalTime);
-        const departureTime= new Date(req.body.departureTime);
+        arrivalTime  = new Date(req.body.arrivalTime);
+        departureTime= new Date(req.body.departureTime);
       }catch{
         res.status(400).json("Date format not understood");
+      }
+      if (departureTime<arrivalTime){
+        res.status(400).json("departureTime can not be before arrivalTime");
       }
       const coordinates = {
         userId        : ObjectID(req.userId),
