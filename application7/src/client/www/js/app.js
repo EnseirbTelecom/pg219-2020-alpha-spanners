@@ -9,7 +9,7 @@ Template7.registerHelper("dateFormat", time => {
     if ( now.getMonth() == date.getMonth() && now.getDate() == date.getDate()){
       return strDate.slice(12,17)
     } else {
-      return strDate.slice(0,5) + strDate.slice(12,17)
+      return strDate.slice(0,5) +' ' + strDate.slice(12,17)
     }
   } else {
     return strDate.slice(0,17)
@@ -24,6 +24,10 @@ var app = new Framework7({
   theme: 'auto', // Automatic theme detection
   touch: {
     tapHold: true //enable tap hold events
+  },
+  navbar: {
+    mdCenterTitle: true,
+    auroraCenterTitle: true,
   },
 
   // App root data
