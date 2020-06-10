@@ -165,8 +165,10 @@ function implement(app,database){
   app.put('/friend/accept/:otherId', verifyToken, (req,res) => {
     database.collection('friends').updateOne(
       { receiverId : ObjectID(req.userId), senderId : ObjectID(req.params.otherId) },
-      { $currentDate: { lastModified: true } },
-      { $set: {status : 'accepted' } }
+      { 
+        $set: {status : 'accepted' },
+        $currentDate: { lastModified: true } 
+      }
     )
       .then(command =>  (command.matchedCount) ? res.sendStatus(200): res.sendStatus(404))
       .catch(err => res.sendStatus(500))
@@ -176,8 +178,10 @@ function implement(app,database){
   app.put('/friend/refuse/:otherId', verifyToken, (req,res) => {
     database.collection('friends').updateOne(
       { receiverId : ObjectID(req.userId), senderId : ObjectID(req.params.otherId) },
-      { $currentDate: { lastModified: true } },
-      { $set: {status : 'refused' } }
+      { 
+        $set: {status : 'refused' },
+        $currentDate: { lastModified: true } 
+      }
     )
       .then(command =>  (command.matchedCount) ? res.sendStatus(200): res.sendStatus(404))
       .catch(err => res.sendStatus(500))
@@ -216,8 +220,10 @@ function implement(app,database){
           if (values[1]) { //the receiver has already sent an invite to the user, we accept it
             database.collection('friends').updateOne(
               { _id: values[1]._id},
-              { $currentDate: { lastModified: true } },
-              { $set : { status: 'accepted' } }
+              { 
+                $set : { status: 'accepted' },
+                $currentDate: { lastModified: true }
+              }
             )
               .then(val => res.sendStatus(200))
               .catch( err => res.sendStatus(500) )
@@ -321,13 +327,32 @@ function implement(app,database){
 
     //post a new position
     app.post('/pos/activate', verifyToken, (req,res) => {
+      const checkCoord = (x) => Number(x) > 90 || Number(x) < -90;
+      if( req.body.msg.length >140 ){
+        res.status(400).json("Message too long");
+      } else if(checkCoord(req.body.latitude)){
+        res.status(400).json("Latitude invalid");
+      }else if (checkCoord(req.body.longitude)){
+        res.status(400).json("Longitude invalid");
+      }
+      var arrivalTime;
+      var departureTime;
+      try{
+        arrivalTime  = new Date(req.body.arrivalTime);
+        departureTime= new Date(req.body.departureTime);
+      }catch{
+        res.status(400).json("Date format not understood");
+      }
+      if (departureTime<arrivalTime){
+        res.status(400).json("departureTime can not be before arrivalTime");
+      }
       const coordinates = {
         userId        : ObjectID(req.userId),
         pseudo        : req.userPseudo,
         latitude      : req.body.latitude,
         longitude     : req.body.longitude,
-        arrivalTime   : new Date(req.body.arrivalTime),
-        departureTime : new Date(req.body.departureTime),
+        arrivalTime   : arrivalTime,
+        departureTime : departureTime,
         message       : req.body.msg,
       }
       const p1 = checkPositionTimeOverlap(req.userId,coordinates.arrivalTime,coordinates.departureTime)
