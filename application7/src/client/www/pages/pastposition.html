@@ -1,44 +1,74 @@
 <template>
 <div class="page" data-name="pastposition">
   <!-- Appbar -->
-  <div class="appbar">
+  <div class="navbar">
+    <div class="navbar-bg"></div>
+    <div class="navbar-inner">
     <div class="left">
       <a class="button" href="/home">
         <i class="icon icon-back"></i>
-        Friends
+        Home
         <span class="if-not-md">Back</span>
       </a>
+    </div>
     </div>
   </div>
   <!-- Scrollable page content-->
   <div class="page-content">
     <div class="block-title">My scheduled positions</div>
 
-    <div class="list links-list">
+    <div class="list media-list">
       <ul>
         {{#each futurePos}}
-        <a href="#"><li> ( {{latitude}} ,  {{longitude}}) &nbsp;&nbsp;&nbsp; {{dateFormat arrivalTime}} -> {{dateFormat departureTime}}</li></a>
-        <div class="block block-strong row">
-          <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{_id}}')">Delete position</a></div>
+        <li class="swipeout deleted-callback">
+          <div class="swipeout-content">
+        <a href="#" class="item-link item-content">
+          <div class="item-inner">
+            <div class="item-title-row">
+              <div class="item-title">Lat : {{latitude}} , Long : {{longitude}}</div>
+              <div class="item-after"> {{dateFormat arrivalTime}} -> {{dateFormat departureTime}}</div>
+            </div>
+            <div class="item-text">
+              Message : {{message}}
+            </div>
         </div>
-        <div class="block block-strong row">
-          <div class="col"><a class="button convert-form-to-data" href ='#' @click="positionOnmap('{{latitude}}','{{longitude}}')">Visualize on a map</a></div>
+        </a>
+        <div class="swipeout-actions-right">
+          <a href="#" class="swipeout-delete" data-confirm="Are you sure you want to delete this position?" @click="delete('{{_id}}')">Delete</a>
+          <a href="#" class="color-green alert-reply " @click="positionOnmap('{{latitude}}','{{longitude}}')">On map</a>
         </div>
+        </div>
+      </li>
         {{/each}}
       </ul>
     </div>
     <div class="block-title">My past positions</div>
 
-    <div class="list links-list">
+    <div class="list media-list">
       <ul>
         {{#each pastPos}}
-        <a href="#"><li> ( {{latitude}} ,  {{longitude}}) &nbsp;&nbsp;&nbsp; {{dateFormat arrivalTime}} -> {{dateFormat departureTime}}</li></a>
-        <div class="block block-strong row">
-          <div class="col"><a class="button convert-form-to-data" href ='#' @click="delete('{{_id}}')">Delete position</a></div>
-        </div>
-        <div class="block block-strong row">
-          <div class="col"><a class="button convert-form-to-data" href ='#' @click="positionOnmap('{{latitude}}','{{longitude}}')">Visualize on a map</a></div>
-        </div>
+        <li class="swipeout deleted-callback">
+          <div class="swipeout-content">
+            <a href="#" class="item-link item-content">
+              <div class="item-inner">
+                <div class="item-title-row">
+                  <div class="item-title">Lat : {{latitude}} , Long : {{longitude}}</div>
+                  <div class="item-after"> {{dateFormat arrivalTime}} -> {{dateFormat departureTime}}</div>
+                </div>
+               <div class="item-text">
+               Message : {{message}}
+                </div>
+            </div>
+            </a>
+            </div>
+
+            <div class="swipeout-actions-right">
+              <a href="#" class="swipeout-delete" data-confirm="Are you sure you want to delete this position?" @click="delete('{{_id}}')">Delete</a>
+              <a href="#" class="color-green alert-reply " @click="positionOnmap('{{latitude}}','{{longitude}}')">On map</a>
+            </div>
+       
+
+      </li>
         {{/each}}
       </ul>
     </div>

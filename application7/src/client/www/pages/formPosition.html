@@ -168,11 +168,12 @@ return{
           msg : msg ,
           })
       })
-        
         .catch(err => {app.dialog.alert('Error '+ err); throw err;})
         .finally(resp => this.$router.navigate('/home'))
-        
+        console.log(calendarArrival.getValue()[0].toISOString())
+
     }
+    
   }
 }
 </script>

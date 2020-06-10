@@ -1,6 +1,20 @@
 var $$ = Dom7;
 
-Template7.registerHelper("dateFormat", time => (new Date(time)).toLocaleString("en-Gb").slice(0,17) );
+Template7.registerHelper("dateFormat", time => {
+  const date = new Date(time);
+  const now = new Date();
+  const dayDuration = 24*60*60*1000;
+  const strDate = date.toLocaleString("en-Gb");
+  if(now.getFullYear() == date.getFullYear()){
+    if ( now.getMonth() == date.getMonth() && now.getDate() == date.getDate()){
+      return strDate.slice(12,17)
+    } else {
+      return strDate.slice(0,5) +' ' + strDate.slice(12,17)
+    }
+  } else {
+    return strDate.slice(0,17)
+  }
+});
 
 var app = new Framework7({
   root: '#app', // App root element
@@ -8,6 +22,13 @@ var app = new Framework7({
   id: 'io.framework7.myapp', // App bundle ID
   name: 'FriendFinder', // App name
   theme: 'auto', // Automatic theme detection
+  touch: {
+    tapHold: true //enable tap hold events
+  },
+  navbar: {
+    mdCenterTitle: true,
+    auroraCenterTitle: true,
+  },
 
   // App root data
   data: function () {
