@@ -15,6 +15,7 @@
   </div>
   <!-- Scrollable page content-->
   <div class="page-content">
+    
     <div class="block-title">My scheduled positions</div>
 
     <div class="list media-list">
@@ -35,7 +36,7 @@
         </a>
         <div class="swipeout-actions-right">
           <a href="#" class="swipeout-delete" data-confirm="Are you sure you want to delete this position?" @click="delete('{{_id}}')">Delete</a>
-          <a href="#" class="color-green alert-reply " @click="positionOnmap('{{latitude}}','{{longitude}}')">On map</a>
+          <a class="color-green alert-reply sheet-open" href="#" data-sheet=".my-sheet" @click="openmap('{{latitude}}','{{longitude}}')">On map</a>
         </div>
         </div>
       </li>
@@ -64,8 +65,10 @@
 
             <div class="swipeout-actions-right">
               <a href="#" class="swipeout-delete" data-confirm="Are you sure you want to delete this position?" @click="delete('{{_id}}')">Delete</a>
-              <a href="#" class="color-green alert-reply " @click="positionOnmap('{{latitude}}','{{longitude}}')">On map</a>
+              <a class="color-green alert-reply sheet-open" href="#" data-sheet=".my-sheet" @click="openmap('{{latitude}}','{{longitude}}')">On map</a>
+              
             </div>
+
        
 
       </li>
@@ -74,8 +77,17 @@
     </div>
   </div>
 
-  <div class="block block-strong row">
-      <div class="col"><a class="button convert-form-to-data" href="#" @click='submit'>Return home</a></div>
+  <div class="sheet-modal my-sheet">
+    <div class="toolbar">
+      <div class="toolbar-inner">
+        <div class="left"></div>
+        <div class="right"><a class="link sheet-close" href="#">Done</a></div>
+      </div>
+    </div>
+    <div class="sheet-modal-inner" >
+      <div id="maphistory" style="min-height: 100%; flex:none">
+      </div>
+    </div>
   </div>
 
   </div>
@@ -83,7 +95,9 @@
 </template>
 <script>
 
+
 return {
+ 
   async data (){
     const pPast = app.methods.tokenHandlingFetch("/pos/past" )
       .then(res => res.json());
@@ -112,16 +126,22 @@ return {
         .catch(err => app.dialog.alert('Error ' + err))
 
     },
-    positionOnmap : function(lat,long){
-      this.$router.navigate(
-        {
-          name:'map',
-          params: {
-            latitude  : lat,
-            longitude : long
-          },
-        });
-    }
+    openmap : function(lat,long){
+      var map = new google.maps.Map(document.getElementById('maphistory'), {
+            zoom: 18,
+            center: {lat: parseFloat(lat), lng: parseFloat(long)}
+          });
+
+          var myLatLng = { lat: parseFloat(lat), lng: parseFloat(long) };
+          var marker = new google.maps.Marker(
+              {
+                position: myLatLng,
+                map: map,
+              });
+         
+                
+    },
+    
   }
 }
 </script>
