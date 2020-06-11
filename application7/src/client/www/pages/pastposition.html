@@ -174,6 +174,15 @@ return {
          
                 
     },
+    delete : function(idposition){
+      app.methods.tokenHandlingFetch( "/pos/delete/"  + idposition , { method: "DELETE",})
+        .then(resp => {
+          app.dialog.alert('This position has been deleted')
+          this.$router.navigate('/pastpositions');
+        })
+        .catch(err => app.dialog.alert('Error ' + err))
+
+    },
     
   }
 }
