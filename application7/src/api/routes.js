@@ -38,7 +38,7 @@ function implement(app,database){
 //ANCHOR NOT CONNECTED REQUESTS
   app.post('/login',(req,res) => {
     const infoLogin = {
-      mail : req.body.mail,
+      mail : req.body.mail.trim().toLowerCase(),
       password : req.body.password,
     }
 
@@ -80,24 +80,30 @@ function implement(app,database){
 
   app.post('/register',(req,res) => {
 
-    const regexEmail = /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,10})(\.[a-z]{2,10})?$/
+    const regexEmail = /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
     const regexStrings = /^[a-z\d]{1,16}$/i
     const decryptedPassword = CryptoJS.AES.decrypt(req.body.password,'secret key 123').toString(CryptoJS.enc.Utf8);
     if(decryptedPassword.length < 6 || decryptedPassword.length > 20){
       return res.status(400).json({error: " Your password must contain between 6 and 20 characters "})
     }
+    var bday;
+    try {
+      bday = new Date(req.body.birthday)
+    } catch {
+      return res.status(400).json({error:"Birthday's date format not understood"});
+    }
     bcrypt.hash(decryptedPassword,10)
       .then(hashedPassword=> {
         const user = {
-          mail         : req.body.mail,
+          mail         : req.body.mail.trim().toLowerCase(),
           password     : hashedPassword,
-          surname      : req.body.surname,
-          name         : req.body.name,
-          pseudo       : req.body.pseudo,
-          birthday     : req.body.birthday
+          surname      : req.body.surname.trim(),
+          name         : req.body.name.trim(),
+          pseudo       : req.body.pseudo.trim(),
+          birthday     : bday
         }
 
-        if(user.mail === '' || user.password === '' || user.surname === '' || user.name === '' || user.pseudo === '' || user.birthday === ''){
+        if(user.mail === '' || user.password === '' || user.surname === '' || user.name === '' || user.pseudo === ''){
           return res.status(400).json({error:"You must fill every field"});
         }
 
@@ -118,10 +124,10 @@ function implement(app,database){
 
         //Conditions sur le mail , la longueur du password
 
-        database.collection('users').findOne({$or: [{mail:req.body.mail},{pseudo: req.body.pseudo}]})
+        database.collection('users').findOne({$or: [{mail:user.mail},{pseudo: user.pseudo}]})
           .then(userDb => {
             if (userDb){
-              if (userDb.mail === req.body.mail){
+              if (userDb.mail === user.mail){
                 return res.status(409).json({error:"Mail already exists !"});
               } else { //else that is the pseudo that is already taken
                 return res.status(409).json({error:"Pseudo already taken !"});
