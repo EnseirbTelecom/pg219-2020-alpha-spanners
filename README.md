@@ -44,4 +44,4 @@ lancer sur un émulateur android ou un téléphone android connecté
 ```
 cordova run android
 ```
-*Note: pour le lancer sur un téléphone android il faudra changer l'adresse du serveur pour y mettre l'IP du serveur dans un réseaux en commun avec le téléphone:* **application7/src/client/www/js/app.js ligne 36** 
+*Note: pour le lancer sur un téléphone android il faudra changer l'adresse du serveur pour y mettre l'IP du serveur dans un réseau en commun avec le téléphone:* **application7/src/client/www/js/app.js ligne 36** 
