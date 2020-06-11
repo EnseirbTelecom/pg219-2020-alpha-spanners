@@ -1,20 +1,14 @@
 <template>
-  <div class="page" data-name="home">
+  <div class="page" data-name="home" style="height: 100%;display: flex;flex-direction: column;">
     <div class="toolbar tabbar toolbar-bottom">
       <div class="toolbar-inner">
         <a  class="link" @click="activatePosition">
           <i class="icon material-icons if-md"> add_location</i>
           <span>Activate</span>
         </a>
-        <a  class="link"  @click='positionInMap'>
-          
-          <i class="icon material-icons if-md"> map</i>
-          <span>On map</span>
-      </a>
-  
-  
       </div>
-    </div>
+    
+  </div>
     <div id="app">
       <div id = "my-panel" class="panel panel-left panel-cover theme-color panel-init">
         <div class="view">
@@ -22,7 +16,7 @@
             <div class="navbar">
               <div class="navbar-bg"></div>
               <div class="navbar-inner">
-                <div class="title">FriendFinder</div>
+                <div class="title"> FriendFinder </div>
               </div>
             </div>
             <div id = "panelcontent" class="page-content" >
@@ -84,7 +78,7 @@
       </div>
         
   
-      <div class="navbar navbar-small">
+      <div class="navbar">
         <div class="navbar-bg"></div>
         <div class="navbar-inner">
           <div class="left">
@@ -94,81 +88,82 @@
             </a>
           </div>
          
-          <div class="title-small">
-            <div class="title-small-text">FriendFinder</div>
-          </div>
+          <div class="title"> FriendFinder </div>
+
           <div class="right">
             <a href="#tab4" class="tab-link panel-close" @click='notification'>
-              <i class="icon f7-icons if-not-md">bell<!--span class="badge bg-red">{{nbNotifs}}</span--></i> 
-              <i class="icon material-icons if-md">notifications<span class="badge bg-red">{{nbNotifs}}</span></i>
+              <i class="icon f7-icons if-not-md">bell</i> 
+              <i class="icon material-icons if-md">notifications</i>
          
             </a>
           </div>
         </div>
       </div>
-      <div class="body">
-        <div id="heading">
-         
-          <div class="row">
-            <div class="col-6 col-12-medium" id="ph">
-              <h1 class="phrase">Share your location with your friends</h1>
-            </div>
-  
-        </div>
-      </div>
-     
+    </div>
+    <div id="mapfriend" style="min-height: 50%; flex:none"> </div>
+    <div class="page-content" style="flex:auto; overflow-y:scroll">
       <div class="block-title">Friends' position</div>
-      <div class="list">
+      
+      <div class="list media-list no-hairlines-between" >
         <ul>
-          {{#each friendsposition}}
-          <div class="row">
-
-          <a href="#"><li><i class="icon material-icons if-md">beenhere</i>  {{pseudo}} is currently at ({{latitude}} {{longitude}})</li></a>
-            <a class="button convert-form-to-data" href ='#' @click="visualizeOnmap('{{latitude}}', '{{longitude}}')">see on a map</a>
-          </div>
+          {{#each friendsPosition}}
+          <li class="accordion-item">
+            <button href="#" id="{{@index}}" class="item-link item-content segmented-strong" @click="selectPosition('{{@index}}')">
+            <div class="item-inner">
+              <div class="item-title-row">
+                <div class="item-title">{{pseudo}} </div>
+                <div class="item-after">{{dateFormat arrivalTime}} => {{dateFormat departureTime}} </div>
+              </div>
+              <!-- <div class="item-subtitle">is currently at ({{latitude}} {{longitude}})</div> -->
+              <div class="accordion-item-content">        
+                <div >{{message}}</div>
+              </div>
+            </div>
+            </button>
+            <hr style="height:0px ;border-width:1px;border-color:#d3d3d333 ; color: #d3d3d333; background-color:#d3d3d333">
+          </li>
           {{/each}}
         </ul>
       </div>
-   
     </div>
-  
+
+    <input id="clipStorage" type="text" style="height:12px; flex:none">"> <!-- a hidden input area, purpose : set desired content into it then copy it to clipboard -->
   </div>
+  
   </template>
   <script>
+  var notifClip = app.notification.create({
+    icon: '<i class="icon f7-icons">doc_on_clipboard</i>',
+    title: 'Clipboard',
+    titleRightText: 'now',
+    subtitle: 'Coordinates were added to your clipboard',
+    closeOnClick: true,
+    closeTimeout: 2000,
+  })
   return {
     methods : {
       async data (){
-        var friendsposition = [];
-        var friendreq = [];
-        var sentReq = [];
+        //const list = [0,0,0,0,0,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0,0];
+        //const friendposition = list.map((i) => {return {pseudo : "test", latitude: Math.random()*20 , longitude:Math.random()*20, dateArrival: (new Date()).toISOString()}})
+        //
+        //return { friendsPosition: friendposition, pseudo: "devmode", myPosition : {latitude: 0 , longitude:0}};
+        var friendsPosition = [];
+        var myPosition;
         var pseudo;
         pseudo = app.data.user.pseudo;
-        var nbNotifs;
         try {
-          friendsposition = await app.methods.tokenHandlingFetch("/pos/friends")
+          p1 = app.methods.tokenHandlingFetch("/pos/friends")
             .then(res => res.json());
-          friendreq = await app.methods.tokenHandlingFetch("/friends/received/pending")
+          p2 = app.methods.tokenHandlingFetch("/pos/current")
             .then(res => res.json());
-            sentReq = await app.methods.tokenHandlingFetch( "/friends/sent/accepted")
-           .then(res => res.json())
+          friendsPosition = await p1;
+          myPosition = await p2;
+
         } catch(err) {
           this.$app.dialog.alert("Error " + err);
           throw err;
         }
-        nbNotifs= Object.keys(friendreq).length + Object.keys(sentReq).length;
-        return { friendsposition: friendsposition, pseudo: pseudo, nbNotifs: nbNotifs};
-      },
-      obtainPosition : function() {
-        app.methods.tokenHandlingFetch( "/pos/current")
-          .then(res => res.json())
-          .then(res => {
-            console.log(res)
-            if (res && res.longitude && res.latitude ){
-              this.$app.dialog.alert(res.latitude + ' ' + res.longitude)
-            } else {
-              this.$app.dialog.alert("You must activate you localisation first !")
-            }
-          })
+        return { friendsPosition: friendsPosition, pseudo: pseudo, myPosition: myPosition};
       },
       positionInMap : function() {
         app.methods.tokenHandlingFetch("/pos/current" )
@@ -214,9 +209,141 @@
           name : 'map',
           params : {latitude : lat, longitude: long}
         })
+      },
+      toclipboardCallback : function(){
+        //copy coords to clipboard ---
+        const existsTextarea = document.getElementById("clipStorage")
+        const curPos = this.friendsPosition[this.curPosIndex]
+        existsTextarea.value = "("+String(curPos.latitude)+", "+String(curPos.longitude)+")" ;
+        existsTextarea.select();
+
+        try {
+          var status = document.execCommand('copy');
+          if(!status){
+            console.error("Cannot copy text");
+          }else{
+            console.log("The text is now on the clipboard");
+          }
+        } catch (err) {
+          console.log('Unable to copy.');
+        }
+        existsTextarea.value ="";
+        // ---
+        notifClip.open();
+
+      },
+      selectPosition: function(index){
+        if (this.mapInfoWindow !== undefined){
+
+          this.mapInfoWindow.close()
+          this.mapMarkers[this.curPosIndex].setMap(null);
+
+          const oldEls = $$("#"+this.curPosIndex)
+          
+          oldEls.removeClass("bg-color-white")
+          oldEls.off("taphold", this.toclipboardCallback)
+          if( this.curPosIndex != index){
+            app.accordion.close( oldEls.parent())
+          }
+          
+        }
+        this.curPosIndex = index;
+        this.mapMarkers[index].setMap(this.map);
+
+
+        this.map.setCenter({
+          lat: this.friendsPosition[index].latitude,
+          lng: this.friendsPosition[index].longitude
+        });
+        
+        const els = $$("#"+index)
+        els.addClass("bg-color-white")
+        els.on("taphold", this.toclipboardCallback )
+        
+        app.accordion.open( els.parent());
+        els.parent()[0].scrollIntoView();
+
+        this.mapInfoWindow = new google.maps.InfoWindow({
+          content: this.friendsPosition[index].pseudo
+        });
+        this.mapInfoWindow.open(this.map,this.mapMarkers[index])
       }
           
-    }
+    },
+    on: {
+      pageInit: function(e, page) {
+        this.map = new google.maps.Map(document.getElementById('mapfriend'), {
+          zoom: 8,
+          center: {lat: 0, lng: 0},
+          streetViewControl: false
+        });
+        this.mapMarkers = [];
+        var clusterMarker = [];
+        var tmp,tmp2,data;
+        for (const [index, pos] of this.friendsPosition.entries()){
+          data = {
+            position: {lat: pos.latitude, lng: pos.longitude},
+            label:  {text:  pos.pseudo.slice(0,3), color: 'DarkRed', fontWeight : 'bold'},
+            title: pos.pseudo,
+            icon: {
+              path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+              scale: 3,
+              labelOrigin: new google.maps.Point(0,-7),
+              strokeColor: 'red',
+              fillColor: 'red',
+              fillOpacity: 1,
+              strokeWeight: 1
+            },
+          }
+          tmp = new google.maps.Marker(data);
+          tmp.addListener('click',() => this.selectPosition(index) );
+          clusterMarker.push(tmp);
+          this.mapMarkers.push(new google.maps.Marker(data));
+          // We make too sets of markers:
+          // one managed by cluster, the other popping only when selected (possibly on top the one managed by cluster if it is not clustered)
+          //Why ? beacause adding a infoWindow on top of a marker manager by cluster might cause unwanted behaviour
+          //if the cluster algorithm remove the marker with the infoWindow from the map, and then we trie to close the infoWindow it won't work. 
+          //And we find ourselves with multiple infoWindow open.
+        }
+        var center ;
+        if (this.myPosition && this.myPosition.latitude){
+          center = this.myPosition;
+          const myPosWindow = new google.maps.Marker({
+              label:  {text:  "YOU", color: "DarkRed", fontWeight : 'bold'},
+              position: {lat: this.myPosition.latitude, lng: this.myPosition.longitude},
+              map: this.map,
+              title: 'Your position',
+              icon: {
+                path: google.maps.SymbolPath.BACKWARD_OPEN_ARROW,
+                scale: 3,
+                labelOrigin: new google.maps.Point(0,-7),
+                strokeColor: 'red'
+              },
+          
+            });
+            myPosWindow.addListener('click',() => {
+              app.dialog.confirm("Do you want to deactivate your position ?",  
+                () => app.methods.tokenHandlingFetch("/pos/deactivate",{ method: 'PUT'} )
+                .then(() => this.$router.refreshPage())
+              )
+            })
+
+        } else if (this.friendsPosition[0]) {
+          center = this.friendsPosition[0];
+        } else {
+          center = {latitude: 48.8534100, longitude : 2.3488000}
+        }
+        this.map.setCenter({
+          lat: center.latitude,
+          lng: center.longitude
+        });
+
+     
+        var markerCluster = new MarkerClusterer(this.map, clusterMarker)
+
+
+      }
+   }
   }
   </script>
   

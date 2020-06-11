@@ -35,15 +35,6 @@ function verifyToken(req,res,next){
 
 function implement(app,database){
 
-  function checkPositionTimeOverlap(userId,start,end){
-    //we consider that new values have priority on older one => in case of overlap the older timerange are shrinked
-    const p1 = database.collection('positions').updateOne({userId: ObjectID(userId), arrivalTime : {$lt : end}, departureTime: {$gt : end}},{$set : {arrivalTime: end}});
-    const p2 = database.collection('positions').updateOne({userId: ObjectID(userId), arrivalTime : {$lt : start}, departureTime: {$gt : start}},{$set : {departureTime: start}});
-    return Promise.all([p1,p2]);
-  }
-  
-
-
 //ANCHOR NOT CONNECTED REQUESTS
   app.post('/login',(req,res) => {
     const infoLogin = {
@@ -165,8 +156,10 @@ function implement(app,database){
   app.put('/friend/accept/:otherId', verifyToken, (req,res) => {
     database.collection('friends').updateOne(
       { receiverId : ObjectID(req.userId), senderId : ObjectID(req.params.otherId) },
-      { $currentDate: { lastModified: true } },
-      { $set: {status : 'accepted' } }
+      { 
+        $set: {status : 'accepted' },
+        $currentDate: { lastModified: true } 
+      }
     )
       .then(command =>  (command.matchedCount) ? res.sendStatus(200): res.sendStatus(404))
       .catch(err => res.sendStatus(500))
@@ -176,8 +169,10 @@ function implement(app,database){
   app.put('/friend/refuse/:otherId', verifyToken, (req,res) => {
     database.collection('friends').updateOne(
       { receiverId : ObjectID(req.userId), senderId : ObjectID(req.params.otherId) },
-      { $currentDate: { lastModified: true } },
-      { $set: {status : 'refused' } }
+      { 
+        $set: {status : 'refused' },
+        $currentDate: { lastModified: true } 
+      }
     )
       .then(command =>  (command.matchedCount) ? res.sendStatus(200): res.sendStatus(404))
       .catch(err => res.sendStatus(500))
@@ -216,8 +211,10 @@ function implement(app,database){
           if (values[1]) { //the receiver has already sent an invite to the user, we accept it
             database.collection('friends').updateOne(
               { _id: values[1]._id},
-              { $currentDate: { lastModified: true } },
-              { $set : { status: 'accepted' } }
+              { 
+                $set : { status: 'accepted' },
+                $currentDate: { lastModified: true }
+              }
             )
               .then(val => res.sendStatus(200))
               .catch( err => res.sendStatus(500) )
@@ -236,7 +233,7 @@ function implement(app,database){
     const match = (["accepted", "refused", "pending"].indexOf(req.params.status) > -1) ? { senderId : ObjectID( req.userId), status : req.params.status } : { senderId : ObjectID( req.userId)};
     database.collection('friends').aggregate( [
       {$match : match},
-      {$project: {_id: 0 , id: "$receiverId", pseudo: "$receiverPseudo", status:1 }}
+      {$project: {_id: 0 , id: "$receiverId", pseudo: "$receiverPseudo", status:1, lastModified:1 }}
     ]).sort( { lastModified: -1 } ).toArray()
       .then( sent => res.json(sent))
       .catch( err => {res.sendStatus(500); throw err})
@@ -277,15 +274,16 @@ function implement(app,database){
 //ANCHOR POSITION MANAGEMENT
     //deactivating a position is simply updating the departure time to current time
     app.put('/pos/deactivate',verifyToken, (req,res) => {
-      const now = new Date()
+      const now = new Date( Math.round(Date.now()/60000) *60000 ); // we round to inferior minute, because we expect a minute precision on /pos/activate
+      //so this is important when one deactivate their pos just to activate a new one
       database.collection('positions').updateOne({ userId : ObjectID(req.userId), arrivalTime : {$lte: now},departureTime : {$gte : now}},{$set : {departureTime : now}})
-        .then(command => {console.log('modification effectuée'); res.sendStatus(200)} )
+        .then(command => {console.log('pos deactivated'); res.sendStatus(200)} )
     })
 
     // gets the active position of the user, if there is none then 404
     app.get('/pos/current',  verifyToken, (req,res) => {
       database.collection('positions').findOne({ userId : ObjectID(req.userId), arrivalTime : {$lt : new Date()}, departureTime : {$gte : new Date() }})
-        .then(position => (position) ? res.json(position) : res.status(404).json([]))
+        .then(position => (position) ? res.json(position) : res.json(null))
         .catch(err => {console.log("err" + err); throw err;})
     })
 
@@ -321,19 +319,57 @@ function implement(app,database){
 
     //post a new position
     app.post('/pos/activate', verifyToken, (req,res) => {
+      const checkCoord = (x) => x < 90 && x > -90 && (typeof(x) === "number");
+      if( req.body.msg.length >140 ){
+        res.status(400).json("Message too long");
+        return;
+      } else if(! checkCoord(req.body.latitude)){
+        res.status(400).json("Latitude invalid");
+        return;
+      }else if (! checkCoord(req.body.longitude)){
+        res.status(400).json("Longitude invalid");
+        return;
+      }
+      var arrivalTime;
+      var departureTime;
+      try{
+        arrivalTime  = new Date(req.body.arrivalTime);
+        departureTime= new Date(req.body.departureTime);
+      }catch{
+        res.status(400).json("Date format not understood");
+        return;
+      }
+      if (departureTime <= arrivalTime){
+        res.status(400).json("departureTime can not be before arrivalTime");
+        return;
+      }
+      if( new Date(Date.now() -600000) > arrivalTime){
+        res.status(400).json("arrivalTime can't be less than now");
+        return;
+      }
       const coordinates = {
         userId        : ObjectID(req.userId),
         pseudo        : req.userPseudo,
         latitude      : req.body.latitude,
         longitude     : req.body.longitude,
-        arrivalTime   : new Date(req.body.arrivalTime),
-        departureTime : new Date(req.body.departureTime),
+        arrivalTime   : arrivalTime,
+        departureTime : departureTime,
         message       : req.body.msg,
       }
-      const p1 = checkPositionTimeOverlap(req.userId,coordinates.arrivalTime,coordinates.departureTime)
-      const p2 = database.collection('positions').insertOne(coordinates);
-      Promise.all([p1,p2])
-        .then(r => res.sendStatus(200))
+      //we check if the position conflicts with previous positions
+      database.collection('positions').findOne({$or: [
+        {userId : ObjectID(req.userId), arrivalTime: { $lte : coordinates.departureTime}, departureTime: {$gte : coordinates.departureTime}  },
+        {userId : ObjectID(req.userId), departureTime: { $gt: coordinates.arrivalTime, $lte: coordinates.departureTime}}
+      ]})
+        .then(pos => {
+          if (pos){
+            res.status(409).json("Conflict with an already scheduled position")
+          } else {
+            database.collection('positions').insertOne(coordinates)
+              .then(r => res.sendStatus(201))
+              .catch(err => {console.log(err), res.sendStatus(500)})
+          }
+        })
         .catch(err => {console.log(err), res.sendStatus(500)})
     })
 
@@ -359,7 +395,6 @@ function implement(app,database){
 
     // delete a position given an ID
     app.delete('/pos/delete/:id',verifyToken,(req,res) => {
-      console.log('j ai supprimé une position de mon historique')
       database.collection('positions').deleteOne({_id : ObjectID(req.params.id)})
         .then(deleted  => res.sendStatus(200))
     })

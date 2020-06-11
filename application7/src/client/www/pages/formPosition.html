@@ -1,5 +1,5 @@
 <template>
-  <div class="page" data-name="formPosition">
+  <div class="page" data-name="formPosition" style= "overflow: scroll;">
     <div class="appbar">
       <div class="left">
         <a href="#" class="link back">
@@ -9,8 +9,8 @@
         </a>
       </div>
     </div>
-
-    <div class="page-content">
+    <div id="map" style="min-height: 40%"> </div>
+    <div class="page-content" >
       <div class="block-title">Position form</div>
         <form class="list" id="my-form">
           <ul>
@@ -20,7 +20,7 @@
                 <div class="item-inner">
                   <div class="item-title item-label">Latitude</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="latitude" id="latitude" placeholder="Your latitude">
+                    <input type="text" name="latitude" id="latitude" placeholder="Your latitude" @input="updatePos">
                   </div>
                 </div>
               </div>
@@ -65,7 +65,7 @@
                 <div class="item-inner">
                   <div class="item-title item-label">Optional message</div>
                   <div class="item-input-wrap">
-                    <input type="text" name="msg" id="msg" placeholder="Optional message">
+                    <input type="text" name="msg" id="msg" placeholder="Optional message" maxlength=140>
                   </div>
                 </div>
               </div>
@@ -83,12 +83,34 @@
 <script>
 
 return{
+
    mounted() {
     window.navigator.geolocation.getCurrentPosition(function(position) {
-        var inputLatitude = document.getElementById('latitude')
-        var inputLongitude = document.getElementById('longitude')
-        inputLatitude.value = position.coords.latitude
-        inputLongitude.value = position.coords.longitude
+        $$("#latitude")[0].value = position.coords.latitude;
+        $$("#longitude")[0].value = position.coords.longitude;
+        this.map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 8,
+          center: {lat:position.coords.latitude, lng: position.coords.longitude},
+          streetViewControl: false
+        });
+        this.pos = new google.maps.Marker({
+          label:  {text:  "POS", color: "DarkRed", fontWeight : 'bold'},
+          position: {lat:position.coords.latitude, lng: position.coords.longitude},
+          map: this.map,
+          title: 'Your position',
+          draggable : true,
+          icon: {
+            path: google.maps.SymbolPath.BACKWARD_OPEN_ARROW,
+            scale: 3,
+            labelOrigin: new google.maps.Point(0,-7),
+            strokeColor: 'red'
+          },
+      
+        });
+        this.pos.addListener('drag',pos => {
+          $$("#latitude")[0].value = String(pos.latLng.lat());
+          $$("#longitude")[0].value = String(pos.latLng.lng());
+        } )
       },function(error){
           alert("Error in localisation N° " + error.code + " : " + error.message);
       });
@@ -107,7 +129,6 @@ return{
         on: {
           close: function(calendar){
             const dateArriv = calendar.getValue()[0];
-            console.log(dateArriv.valueOf())
             calendarDeparture.disabled = [
               {to: new Date( dateArriv.valueOf()-24*60*60*1000)},
               {from:  new Date( dateArriv.valueOf() +7*24*60*60*1000)}
@@ -150,11 +171,24 @@ return{
     },
   
   methods :{
+    updatePos: function(){
+      const latitude    = Number.parseFloat($$('#latitude')[0].value);
+      const longitude   = Number.parseFloat($$('#longitude')[0].value);
+      if ( Number.isNaN(latitude) || Number.isNaN(longitude)){
+        this.$app.dialog.alert("coordinates not understood")
+      } else {
+        window.pos.setPosition( { lat : latitude, lng: longitude})
+      }
 
+    },
     submit: function() {
       const msg         = document.getElementById('msg').value;
-      const latitude    = document.getElementById('latitude').value;
-      const longitude   = document.getElementById('longitude').value;
+      const latitude    = Number.parseFloat($$('#latitude')[0].value);
+      const longitude   = Number.parseFloat($$('#longitude')[0].value);
+      if ( Number.isNaN(latitude) || Number.isNaN(longitude)){
+        this.$app.dialog.alert("coordinates not understood")
+        return;
+      }
       app.data.user.lat = latitude;
       app.data.user.lng = longitude;
       app.methods.tokenHandlingFetch("/pos/activate" , {
@@ -168,11 +202,21 @@ return{
           msg : msg ,
           })
       })
-        
+        .then(res => {
+          if( res.status == 201){
+            this.$router.navigate('/home');
+          } else if(res.status == 409){
+            app.dialog.confirm("This position overlaps an already scheduled positon. Want to check it ?",  () => this.$router.navigate('/pastpositions'))
+          } else {
+            res.json().then(json => app.dialog.alert('Error '+ json));
+          }
+          
+        })
         .catch(err => {app.dialog.alert('Error '+ err); throw err;})
-        .finally(resp => this.$router.navigate('/home'))
         
+
     }
+    
   }
 }
 </script>
