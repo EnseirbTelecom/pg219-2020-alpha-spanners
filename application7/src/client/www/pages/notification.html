@@ -45,6 +45,7 @@
           <div class="item-content swipeout-content">
             <div class="item-inner">
               <div class="item-title">{{pseudo}} accepted your invitation</div>
+              <div class="item-after">{{dateFormat lastModified}}  </div>
             </div>
           </div>
           <div class="swipeout-actions-left">
@@ -56,6 +57,7 @@
               <div class="item-content swipeout-content">
                 <div class="item-inner">
                   <div class="item-title">{{pseudo}} refused your invitation</div>
+                  <div class="item-after">{{dateFormat lastModified}}  </div>
                 </div>
               </div>
               <div class="swipeout-actions-left">
@@ -86,7 +88,6 @@ return{
       app.dialog.alert("Error " + err);
     }
     finally{
-      console.log('num is'+ Object.keys(myfriends).length);
       return {myfriends : myfriends, acceptedReq: acceptedReq};
     }
 

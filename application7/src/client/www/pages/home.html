@@ -6,13 +6,6 @@
           <i class="icon material-icons if-md"> add_location</i>
           <span>Activate</span>
         </a>
-        <a  class="link"  @click='positionInMap'>
-          
-          <i class="icon material-icons if-md"> map</i>
-          <span>On map</span>
-      </a>
-  
-  
       </div>
     
   </div>
@@ -99,8 +92,8 @@
 
           <div class="right">
             <a href="#tab4" class="tab-link panel-close" @click='notification'>
-              <i class="icon f7-icons if-not-md">bell<!--span class="badge bg-red">{{nbNotifs}}</span--></i> 
-              <i class="icon material-icons if-md"><span class="badge bg-red">1</span>notifications</i>
+              <i class="icon f7-icons if-not-md">bell</i> 
+              <i class="icon material-icons if-md">notifications</i>
          
             </a>
           </div>
@@ -119,11 +112,11 @@
             <div class="item-inner">
               <div class="item-title-row">
                 <div class="item-title">{{pseudo}} </div>
-                <div class="item-after">{{dateFormat dateArrival}} => </div>
+                <div class="item-after">{{dateFormat arrivalTime}} => {{dateFormat departureTime}} </div>
               </div>
               <!-- <div class="item-subtitle">is currently at ({{latitude}} {{longitude}})</div> -->
               <div class="accordion-item-content">        
-                <div >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sagittis tellus ut turpis condimentum, ut dignissim lacus tincidunt. Cras dolor metus, ultrices condimentum sodales sit amet, pharetra sodales eros. Phasellus vel felis tellus. Mauris rutrum ligula nec dapibus feugiat. In vel dui laoreet, commodo augue id, pulvinar lacus.</div>
+                <div >{{message}}</div>
               </div>
             </div>
             </button>
@@ -147,45 +140,30 @@
     closeOnClick: true,
     closeTimeout: 2000,
   })
-  console.log(notifClip)
   return {
     methods : {
       async data (){
-        const list = [0,0,0,0,0,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0,0];
-        const friendposition = list.map((i) => {return {pseudo : "test", latitude: Math.random()*20 , longitude:Math.random()*20, dateArrival: (new Date()).toISOString()}})
-        
-        return { friendsPosition: friendposition, pseudo: "devmode", nbNotifs: 0};
+        //const list = [0,0,0,0,0,0,0,0,0,0,0,0,00,0,0,0,0,0,0,0,0];
+        //const friendposition = list.map((i) => {return {pseudo : "test", latitude: Math.random()*20 , longitude:Math.random()*20, dateArrival: (new Date()).toISOString()}})
+        //
+        //return { friendsPosition: friendposition, pseudo: "devmode", myPosition : {latitude: 0 , longitude:0}};
         var friendsPosition = [];
-        var friendreq = [];
-        var sentReq = [];
+        var myPosition;
         var pseudo;
         pseudo = app.data.user.pseudo;
-        var nbNotifs;
         try {
-          friendsPosition = await app.methods.tokenHandlingFetch("/pos/friends")
+          p1 = app.methods.tokenHandlingFetch("/pos/friends")
             .then(res => res.json());
-          friendreq = await app.methods.tokenHandlingFetch("/friends/received/pending")
+          p2 = app.methods.tokenHandlingFetch("/pos/current")
             .then(res => res.json());
-            sentReq = await app.methods.tokenHandlingFetch( "/friends/sent/accepted")
-           .then(res => res.json())
+          friendsPosition = await p1;
+          myPosition = await p2;
+
         } catch(err) {
           this.$app.dialog.alert("Error " + err);
           throw err;
         }
-        nbNotifs= Object.keys(friendreq).length + Object.keys(sentReq).length;
-        return { friendsPosition: friendsPosition, pseudo: pseudo, nbNotifs: nbNotifs};
-      },
-      obtainPosition : function() {
-        app.methods.tokenHandlingFetch( "/pos/current")
-          .then(res => res.json())
-          .then(res => {
-            console.log(res)
-            if (res && res.longitude && res.latitude ){
-              this.$app.dialog.alert(res.latitude + ' ' + res.longitude)
-            } else {
-              this.$app.dialog.alert("You must activate you localisation first !")
-            }
-          })
+        return { friendsPosition: friendsPosition, pseudo: pseudo, myPosition: myPosition};
       },
       positionInMap : function() {
         app.methods.tokenHandlingFetch("/pos/current" )
@@ -296,32 +274,70 @@
       pageInit: function(e, page) {
         this.map = new google.maps.Map(document.getElementById('mapfriend'), {
           zoom: 8,
-          center: {lat: 0, lng: 0}
+          center: {lat: 0, lng: 0},
+          streetViewControl: false
         });
         this.mapMarkers = [];
         var clusterMarker = [];
-        console.log(this)
         var tmp,tmp2,data;
         for (const [index, pos] of this.friendsPosition.entries()){
           data = {
             position: {lat: pos.latitude, lng: pos.longitude},
-            label: pos.pseudo.slice(0,3),
+            label:  {text:  pos.pseudo.slice(0,3), color: 'DarkRed', fontWeight : 'bold'},
             title: pos.pseudo,
+            icon: {
+              path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+              scale: 3,
+              labelOrigin: new google.maps.Point(0,-7),
+              strokeColor: 'red',
+              fillColor: 'red',
+              fillOpacity: 1,
+              strokeWeight: 1
+            },
           }
           tmp = new google.maps.Marker(data);
-          tmp.addListener('click',() => this.selectPosition(index) )
-          clusterMarker.push(tmp)
-          this.mapMarkers.push(new google.maps.Marker(data))
+          tmp.addListener('click',() => this.selectPosition(index) );
+          clusterMarker.push(tmp);
+          this.mapMarkers.push(new google.maps.Marker(data));
           // We make too sets of markers:
           // one managed by cluster, the other popping only when selected (possibly on top the one managed by cluster if it is not clustered)
           //Why ? beacause adding a infoWindow on top of a marker manager by cluster might cause unwanted behaviour
           //if the cluster algorithm remove the marker with the infoWindow from the map, and then we trie to close the infoWindow it won't work. 
           //And we find ourselves with multiple infoWindow open.
         }
+        var center ;
+        if (this.myPosition && this.myPosition.latitude){
+          center = this.myPosition;
+          const myPosWindow = new google.maps.Marker({
+              label:  {text:  "YOU", color: "DarkRed", fontWeight : 'bold'},
+              position: {lat: this.myPosition.latitude, lng: this.myPosition.longitude},
+              map: this.map,
+              title: 'Your position',
+              icon: {
+                path: google.maps.SymbolPath.BACKWARD_OPEN_ARROW,
+                scale: 3,
+                labelOrigin: new google.maps.Point(0,-7),
+                strokeColor: 'red'
+              },
+          
+            });
+            myPosWindow.addListener('click',() => {
+              app.dialog.confirm("Do you want to deactivate your position ?",  
+                () => app.methods.tokenHandlingFetch("/pos/deactivate",{ method: 'PUT'} )
+                .then(() => this.$router.refreshPage())
+              )
+            })
+
+        } else if (this.friendsPosition[0]) {
+          center = this.friendsPosition[0];
+        } else {
+          center = {latitude: 48.8534100, longitude : 2.3488000}
+        }
         this.map.setCenter({
-          lat: this.friendsPosition[0].latitude,
-          lng: this.friendsPosition[0].longitude
+          lat: center.latitude,
+          lng: center.longitude
         });
+
      
         var markerCluster = new MarkerClusterer(this.map, clusterMarker)
 
