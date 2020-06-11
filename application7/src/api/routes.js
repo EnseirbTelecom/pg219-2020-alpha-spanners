@@ -35,10 +35,6 @@ function verifyToken(req,res,next){
 
 function implement(app,database){
 
-
-  
-
-
 //ANCHOR NOT CONNECTED REQUESTS
   app.post('/login',(req,res) => {
     const infoLogin = {
