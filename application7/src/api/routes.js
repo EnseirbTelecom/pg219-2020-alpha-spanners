@@ -278,7 +278,8 @@ function implement(app,database){
 //ANCHOR POSITION MANAGEMENT
     //deactivating a position is simply updating the departure time to current time
     app.put('/pos/deactivate',verifyToken, (req,res) => {
-      const now = new Date()
+      const now = new Date( Math.round(Date.now()/60000) *60000 ); // we round to inferior minute, because we expect a minute precision on /pos/activate
+      //so this is important when one deactivate their pos just to activate a new one
       database.collection('positions').updateOne({ userId : ObjectID(req.userId), arrivalTime : {$lte: now},departureTime : {$gte : now}},{$set : {departureTime : now}})
         .then(command => {console.log('pos deactivated'); res.sendStatus(200)} )
     })
@@ -361,8 +362,8 @@ function implement(app,database){
       }
       //we check if the position conflicts with previous positions
       database.collection('positions').findOne({$or: [
-        {arrivalTime: { $lte : coordinates.departureTime}, departureTime: {$gte : coordinates.departureTime}  },
-        {departureTime: { $gte: coordinates.arrivalTime, $lte: coordinates.departureTime}}
+        {userId : ObjectID(req.userId), arrivalTime: { $lte : coordinates.departureTime}, departureTime: {$gte : coordinates.departureTime}  },
+        {userId : ObjectID(req.userId), departureTime: { $gt: coordinates.arrivalTime, $lte: coordinates.departureTime}}
       ]})
         .then(pos => {
           if (pos){
