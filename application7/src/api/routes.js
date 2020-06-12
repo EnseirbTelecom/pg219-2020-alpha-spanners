@@ -42,11 +42,11 @@ function implement(app,database){
       password : req.body.password,
     }
 
-    if(infoLogin.mailUser === '' || infoLogin.passwordUser === ''){
+    if(infoLogin.mail === '' || infoLogin.password === ''){
       return res.status(400).json({error:"You must fill every field"});
     }
 
-    database.collection('users').findOne({mail:req.body.mail})
+    database.collection('users').findOne({mail: infoLogin.mail})
       .then(function(usr){
         if(usr){
 
