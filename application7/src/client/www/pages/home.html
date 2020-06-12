@@ -165,20 +165,6 @@
         }
         return { friendsPosition: friendsPosition, pseudo: pseudo, myPosition: myPosition};
       },
-      positionInMap : function() {
-        app.methods.tokenHandlingFetch("/pos/current" )
-          .then(res => res.json())
-          .then(res => {
-            if (res && res.longitude && res.latitude ){
-              this.$router.navigate({
-                name : 'map',
-                params : {latitude : res.latitude, longitude: res.longitude}
-              })
-            } else {
-              this.$app.dialog.alert("You must activate you localisation first !")
-            }
-          })
-      },
       activatePosition : function(){
         this.$router.navigate('/formPosition')
       },
@@ -186,29 +172,17 @@
         this.$router.navigate('/home');
       },
       myfriends : function(){
-        this.$router.navigate('/friendlist')
+        this.$router.navigate('/friendlist', {ignoreCache: true,})
       },
       notification: function(){
-        this.$router.navigate('/notif');
+        this.$router.navigate('/notif', {ignoreCache: true,});
       },
       disconnect: function(){
         app.dialog.confirm("Are you sure ?", "Logout", () => this.$router.navigate('/'))
         
       },
-      sentRequest:function(){
-        this.$router.navigate('/sentRequest')
-      },
-      addFriend : function(){
-        this.$router.navigate('/addfriends')
-      },
       pastposition : function(){
         this.$router.navigate('/pastpositions')
-      },
-      visualizeOnmap : function(lat, long){
-        this.$router.navigate({
-          name : 'map',
-          params : {latitude : lat, longitude: long}
-        })
       },
       toclipboardCallback : function(){
         //copy coords to clipboard ---

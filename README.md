@@ -1,6 +1,10 @@
 Notice 
 ===========
 
+[Vidéo de présentation](https://www.youtube.com/watch?v=umR5u4scHks)
+
+Nous avons oublié la description de l'API au format open API.
+Cependant les adresses sont très simple, la plupart ne requiert que le token, et possiblement l'id de l'élément sur lequel agir. Les URL sont assez explicites. 
 
 Lancer le serveur
 -----
@@ -8,6 +12,10 @@ Lancer le serveur
 Se rendre dans le dossier api
 ```
 cd application7/src/api
+```
+installer les packages associés
+```
+npm install
 ```
 Lancer le serveur
 ```
@@ -20,6 +28,10 @@ Lancer l'application sur navigateur
 Se rendre dans le dossier client
 ```
 cd application7/src/client
+```
+installer les packages associés et initialiser les registres mongoDB
+```
+npm install
 ```
 Lancer le client
 ```

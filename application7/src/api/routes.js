@@ -9,15 +9,6 @@ const ObjectID = require('mongodb').ObjectID
 
 function verifyToken(req,res,next){
   if ( req.query.token){
-    //NOTE temp
-    if( req.query.token == "dev"){
-      req.userId = "5ec873100d0135103028c018";
-      next();
-    }
-    else {
-
-    
-    //
     jwt.verify(req.query.token,JWT_KEY, (err,data) => {
       if (err){
           return res.status(400).json({error:err.name})
@@ -27,7 +18,6 @@ function verifyToken(req,res,next){
         next();
       }
     });
-    }
   } else {
     return res.status(400).json({error:"no token"})
   }
