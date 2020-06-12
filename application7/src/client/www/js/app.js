@@ -65,6 +65,12 @@ var app = new Framework7({
     tokenHandlingFetch: async function(relativePath, data){
       // this function does the same as fetch except it adds the token in the url and handle the invalid token error from the server
       if (app.methods.checkToken()){
+        if (data){
+          data.cache= "no-cache";
+        } else {
+          data = {cache : "no-cache"};
+        }
+        
         return  fetch( app.data.serverAddress + relativePath + "/?token=" + localStorage.token,data)
                 .catch(err => {
                   if (err.message == "TokenExpiredError"){
